@@ -1,1 +1,38 @@
-import { create } from 'zustand'; 
+﻿import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface AuthUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'CUSTOMER' | 'ADMIN' | 'SUPER_ADMIN';
+  avatarUrl?: string;
+}
+
+interface AuthStore {
+  user: AuthUser | null;
+  accessToken: string | null;
+  setAuth: (user: AuthUser, token: string) => void;
+  clearAuth: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
+}
+
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      setAuth: (user, accessToken) => set({ user, accessToken }),
+      clearAuth: () => set({ user: null, accessToken: null }),
+      updateUser: (updates) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updates } : null,
+        })),
+    }),
+    {
+      name: 'luxora-auth',
+      partialize: (state) => ({ user: state.user }),
+    }
+  )
+);
