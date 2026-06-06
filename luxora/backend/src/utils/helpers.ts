@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { randomBytes } from 'crypto';
 
 export async function generateSlug(name: string, exists: (slug: string) => Promise<boolean>): Promise<string> {
   const base = name
@@ -21,7 +21,7 @@ export async function generateSlug(name: string, exists: (slug: string) => Promi
 export function generateOrderNumber(): string {
   const prefix = 'LXR';
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = nanoid(4).toUpperCase();
+  const random = randomBytes(2).toString('hex').toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
 }
 
