@@ -6,7 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'cdn.luxora.in' },
     ],
-    formats: ['image/webp'],
+    unoptimized: true,
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,

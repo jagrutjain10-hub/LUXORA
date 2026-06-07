@@ -1,7 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-// ─── WISHLIST STORE ───────────────────────────────────────────────────────────
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface WishlistStore {
   ids: string[];
@@ -21,11 +19,19 @@ export const useWishlistStore = create<WishlistStore>()(
       isWishlisted: (id) => get().ids.includes(id),
       clear: () => set({ ids: [] }),
     }),
-    { name: 'luxora-wishlist' }
+    {
+      name: 'luxora-wishlist',
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined') return localStorage;
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
+    }
   )
 );
-
-// ─── AUTH STORE ───────────────────────────────────────────────────────────────
 
 interface AuthUser {
   id: string;
@@ -56,7 +62,15 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'luxora-auth',
-      partialize: (state) => ({ user: state.user }), // Don't persist token
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined') return localStorage;
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
+      partialize: (state) => ({ user: state.user }),
     }
   )
 );

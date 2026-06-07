@@ -1,6 +1,5 @@
-// ─── cart.store.ts ────────────────────────────────────────────────────────────
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface CartItem {
   productId: string;
@@ -25,7 +24,6 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-
       addItem: (item) =>
         set((state) => {
           const existing = state.items.find(i => i.productId === item.productId);
@@ -40,27 +38,32 @@ export const useCartStore = create<CartStore>()(
           }
           return { items: [...state.items, { ...item, quantity: item.quantity ?? 1 }] };
         }),
-
       removeItem: (productId) =>
         set((state) => ({ items: state.items.filter(i => i.productId !== productId) })),
-
       updateQuantity: (productId, quantity) =>
         set((state) => ({
           items: quantity <= 0
             ? state.items.filter(i => i.productId !== productId)
             : state.items.map(i => i.productId === productId ? { ...i, quantity } : i),
         })),
-
       clearCart: () => set({ items: [] }),
-
       subtotal: () => get().items.reduce((s, i) => s + i.price * i.quantity, 0),
-
       total: () => {
         const subtotal = get().subtotal();
         const shipping = subtotal >= 2999 ? 0 : 199;
         return subtotal + shipping;
       },
     }),
-    { name: 'luxora-cart' }
+    {
+      name: 'luxora-cart',
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined') return localStorage;
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
+    }
   )
 );
