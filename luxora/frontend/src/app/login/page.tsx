@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -20,7 +20,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPass, setShowPass] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,16 +41,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-obsidian flex">
-      {/* Left: Decorative Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden"
         style={{ background: 'radial-gradient(ellipse at 40% 60%, #2d1f0e 0%, #0a0a0a 70%)' }}
       >
         <div className="absolute inset-0 bg-noise opacity-40" />
-
-        {/* Decorative circles */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full border border-champagne-800/20" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full border border-champagne-800/10" />
-
         <div className="relative z-10 text-center px-16">
           <Link href="/">
             <div className="font-display text-4xl text-ivory tracking-[0.4em] font-light mb-4">LUXORA</div>
@@ -70,7 +66,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right: Login Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -78,7 +73,6 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md"
         >
-          {/* Mobile logo */}
           <Link href="/" className="lg:hidden block text-center mb-10">
             <span className="font-display text-3xl text-ivory tracking-[0.4em]">LUXORA</span>
           </Link>
@@ -162,5 +156,13 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-obsidian" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
