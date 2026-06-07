@@ -9,7 +9,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
 import { NewsletterSection } from '@/components/home/NewsletterSection';
-import { MarqueeBar } from '@/components/home/MarqueeBar';
+
 import { AnimatedSection } from '@/components/ui/AnimatedSection';
 import { cn } from '@/lib/utils';
 
