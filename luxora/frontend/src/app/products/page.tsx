@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, X, ChevronDown, Grid3X3, LayoutList } from 'lucide-react';
@@ -37,12 +37,12 @@ const CATEGORIES = [
   { name: 'Premium Accessories', slug: 'premium-accessories' },
 ];
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState(4);
   const [page, setPage] = useState(1);
 
   const params = {
@@ -59,7 +59,7 @@ export default function ProductsPage() {
 
   const { data, isLoading } = useProducts(params);
 
-  const updateParam = useCallback((key: string, value: string) => {
+  const updateParam = useCallback((key, value) => {
     const sp = new URLSearchParams(searchParams.toString());
     if (value) sp.set(key, value); else sp.delete(key);
     sp.delete('page');
@@ -83,8 +83,6 @@ export default function ProductsPage() {
     <>
       <Navbar />
       <main className="pt-[var(--nav-height)] min-h-screen bg-ivory-50">
-
-        {/* Page Header */}
         <div className="bg-obsidian py-16 section-px">
           <div className="max-w-8xl mx-auto text-center">
             <div className="label-gold text-champagne-400 mb-3">LUXORA</div>
@@ -98,7 +96,6 @@ export default function ProductsPage() {
         </div>
 
         <div className="container-luxury py-12">
-          {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-sand-200">
             <div className="flex items-center gap-3">
               <button
@@ -118,8 +115,6 @@ export default function ProductsPage() {
                   </span>
                 )}
               </button>
-
-              {/* Active filter pills */}
               <AnimatePresence>
                 {params.category && (
                   <motion.button
@@ -137,7 +132,6 @@ export default function ProductsPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Sort */}
               <div className="relative">
                 <select
                   value={`${params.sort}-${params.order}`}
@@ -146,8 +140,7 @@ export default function ProductsPage() {
                     updateParam('sort', s);
                     updateParam('order', o);
                   }}
-                  className="appearance-none pl-4 pr-10 py-2.5 border border-obsidian/15 bg-white text-sm font-body
-                             text-obsidian focus:outline-none focus:border-champagne-500 cursor-pointer"
+                  className="appearance-none pl-4 pr-10 py-2.5 border border-obsidian/15 bg-white text-sm font-body text-obsidian focus:outline-none focus:border-champagne-500 cursor-pointer"
                 >
                   {SORT_OPTIONS.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -155,10 +148,8 @@ export default function ProductsPage() {
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-obsidian/40 pointer-events-none" />
               </div>
-
-              {/* Grid toggle */}
               <div className="hidden md:flex items-center border border-obsidian/15">
-                {([3, 4] as const).map(cols => (
+                {[3, 4].map(cols => (
                   <button
                     key={cols}
                     onClick={() => setGridCols(cols)}
@@ -166,7 +157,6 @@ export default function ProductsPage() {
                       'p-2.5 transition-colors',
                       gridCols === cols ? 'bg-obsidian text-ivory' : 'text-obsidian/40 hover:text-obsidian'
                     )}
-                    aria-label={`${cols} columns`}
                   >
                     {cols === 4 ? <Grid3X3 size={15} /> : <LayoutList size={15} />}
                   </button>
@@ -176,14 +166,13 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex gap-8">
-            {/* Sidebar Filters */}
             <AnimatePresence>
               {filtersOpen && (
                 <motion.aside
                   initial={{ opacity: 0, x: -20, width: 0 }}
                   animate={{ opacity: 1, x: 0, width: 260 }}
                   exit={{ opacity: 0, x: -20, width: 0 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.35 }}
                   className="flex-shrink-0 overflow-hidden"
                   style={{ minWidth: 260 }}
                 >
@@ -191,8 +180,6 @@ export default function ProductsPage() {
                     <h2 className="font-body text-xs uppercase tracking-widest text-obsidian/60 mb-6 font-medium">
                       Refine Results
                     </h2>
-
-                    {/* Category */}
                     <FilterSection title="Category">
                       {CATEGORIES.map(cat => (
                         <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group py-1.5">
@@ -212,8 +199,6 @@ export default function ProductsPage() {
                         </label>
                       ))}
                     </FilterSection>
-
-                    {/* Price Range */}
                     <FilterSection title="Price Range">
                       {PRICE_RANGES.map(range => (
                         <label key={range.label} className="flex items-center gap-3 cursor-pointer group py-1.5">
@@ -233,8 +218,6 @@ export default function ProductsPage() {
                         </label>
                       ))}
                     </FilterSection>
-
-                    {/* Special */}
                     <FilterSection title="Collection">
                       {[
                         { label: 'Featured', key: 'featured', value: 'true' },
@@ -251,7 +234,6 @@ export default function ProductsPage() {
                         </label>
                       ))}
                     </FilterSection>
-
                     {activeFiltersCount > 0 && (
                       <button
                         onClick={() => router.push('/products')}
@@ -265,13 +247,9 @@ export default function ProductsPage() {
               )}
             </AnimatePresence>
 
-            {/* Product Grid */}
             <div className="flex-1 min-w-0">
               {isLoading ? (
-                <div className={cn(
-                  'grid gap-5',
-                  gridCols === 4 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'
-                )}>
+                <div className={cn('grid gap-5', gridCols === 4 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3')}>
                   {Array.from({ length: 12 }).map((_, i) => (
                     <ProductCardSkeleton key={i} />
                   ))}
@@ -281,16 +259,11 @@ export default function ProductsPage() {
                   <div className="font-display text-6xl text-sand-300 mb-6">◇</div>
                   <h3 className="font-display text-2xl text-obsidian font-light mb-3">No products found</h3>
                   <p className="text-obsidian/50 font-body mb-8">Try adjusting your filters or search terms.</p>
-                  <button onClick={() => router.push('/products')} className="btn-secondary">
-                    Clear Filters
-                  </button>
+                  <button onClick={() => router.push('/products')} className="btn-secondary">Clear Filters</button>
                 </div>
               ) : (
                 <>
-                  <div className={cn(
-                    'grid gap-5',
-                    gridCols === 4 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'
-                  )}>
+                  <div className={cn('grid gap-5', gridCols === 4 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3')}>
                     {data?.products.map((product, i) => (
                       <motion.div
                         key={product.id}
@@ -298,12 +271,10 @@ export default function ProductsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: Math.min(i * 0.04, 0.4) }}
                       >
-                        <ProductCard product={product as any} />
+                        <ProductCard product={product} />
                       </motion.div>
                     ))}
                   </div>
-
-                  {/* Pagination */}
                   {data && data.pagination.totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-16">
                       {Array.from({ length: data.pagination.totalPages }, (_, i) => i + 1).map(p => (
@@ -312,9 +283,7 @@ export default function ProductsPage() {
                           onClick={() => setPage(p)}
                           className={cn(
                             'w-10 h-10 text-sm font-body transition-all duration-200',
-                            page === p
-                              ? 'bg-obsidian text-ivory'
-                              : 'border border-obsidian/15 text-obsidian/60 hover:border-obsidian hover:text-obsidian'
+                            page === p ? 'bg-obsidian text-ivory' : 'border border-obsidian/15 text-obsidian/60 hover:border-obsidian hover:text-obsidian'
                           )}
                         >
                           {p}
@@ -333,14 +302,11 @@ export default function ProductsPage() {
   );
 }
 
-function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
+function FilterSection({ title, children }) {
   const [open, setOpen] = useState(true);
   return (
     <div className="mb-7 pb-7 border-b border-sand-200 last:border-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full mb-4 group"
-      >
+      <button onClick={() => setOpen(!open)} className="flex items-center justify-between w-full mb-4 group">
         <span className="text-xs font-body uppercase tracking-widest text-obsidian font-medium">{title}</span>
         <ChevronDown size={14} className={cn('text-obsidian/40 transition-transform duration-200', !open && '-rotate-90')} />
       </button>
@@ -358,5 +324,13 @@ function FilterSection({ title, children }: { title: string; children: React.Rea
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-ivory-50" />}>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

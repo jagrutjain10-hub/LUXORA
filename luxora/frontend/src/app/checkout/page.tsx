@@ -28,8 +28,6 @@ const shippingSchema = z.object({
   pincode: z.string().length(6, 'Valid 6-digit pincode required'),
 });
 
-type ShippingFormData = z.infer<typeof shippingSchema>;
-
 const PAYMENT_METHODS = [
   { id: 'RAZORPAY', icon: CreditCard, label: 'Credit / Debit Card', sub: 'Visa, Mastercard, RuPay' },
   { id: 'UPI', icon: Smartphone, label: 'UPI', sub: 'GPay, PhonePe, Paytm' },
@@ -45,14 +43,9 @@ const INDIAN_STATES = [
   'Delhi', 'Jammu & Kashmir', 'Ladakh',
 ];
 
-// ─── RAZORPAY HELPERS ──────────────────────────────────────────────────────────
-
-declare global {
-  interface Window { Razorpay: any; }
-}
-
-async function loadRazorpay(): Promise<boolean> {
+async function loadRazorpay() {
   return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false);
     if (window.Razorpay) return resolve(true);
     const s = document.createElement('script');
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -63,9 +56,9 @@ async function loadRazorpay(): Promise<boolean> {
 }
 
 export default function CheckoutPage() {
-  const [step, setStep] = useState<'shipping' | 'payment' | 'review'>('shipping');
-  const [paymentMethod, setPaymentMethod] = useState<string>('RAZORPAY');
-  const [shippingData, setShippingData] = useState<ShippingFormData | null>(null);
+  const [step, setStep] = useState('shipping');
+  const [paymentMethod, setPaymentMethod] = useState('RAZORPAY');
+  const [shippingData, setShippingData] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
 
@@ -77,7 +70,7 @@ export default function CheckoutPage() {
   const shipping = sub >= 2999 ? 0 : 199;
   const total = sub + shipping;
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ShippingFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(shippingSchema),
     defaultValues: {
       fullName: user ? `${user.firstName} ${user.lastName}` : '',
@@ -85,7 +78,7 @@ export default function CheckoutPage() {
     },
   });
 
-  const onShippingSubmit = (data: ShippingFormData) => {
+  const onShippingSubmit = (data) => {
     setShippingData(data);
     setStep('payment');
   };
@@ -95,7 +88,6 @@ export default function CheckoutPage() {
     setProcessing(true);
 
     try {
-      // 1. Create order in backend
       const { data: orderRes } = await orderApi.create({
         items: items.map(i => ({ productId: i.productId, quantity: i.quantity })),
         paymentMethod,
@@ -110,7 +102,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2. Razorpay / UPI flow
       const loaded = await loadRazorpay();
       if (!loaded) throw new Error('Razorpay SDK failed to load');
 
@@ -121,9 +112,9 @@ export default function CheckoutPage() {
         amount: rzpRes.data.amount,
         currency: rzpRes.data.currency,
         name: 'LUXORA',
-        description: 'Luxury Home Décor',
+        description: 'Luxury Home Decor',
         order_id: rzpRes.data.razorpayOrderId,
-        handler: async (response: any) => {
+        handler: async (response) => {
           const { data: verifyRes } = await paymentApi.verify({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -142,20 +133,18 @@ export default function CheckoutPage() {
         },
         notes: { orderId },
         theme: { color: '#c9a96e' },
-        modal: {
-          ondismiss: () => { setProcessing(false); },
-        },
+        modal: { ondismiss: () => setProcessing(false) },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.response?.data?.message ?? 'Failed to place order. Please try again.');
       setProcessing(false);
     }
   };
 
-  if (!items.length) {
+  if (typeof window !== 'undefined' && !items.length) {
     router.push('/cart');
     return null;
   }
@@ -164,29 +153,21 @@ export default function CheckoutPage() {
     <>
       <Navbar />
       <main className="pt-[var(--nav-height)] min-h-screen bg-ivory-50">
-        {/* Header */}
         <div className="bg-obsidian py-10 section-px text-center">
           <div className="label-gold text-champagne-400 mb-2">Secure Checkout</div>
           <h1 className="font-display text-display-sm text-ivory font-light">Complete Your Order</h1>
-
-          {/* Step indicator */}
           <div className="flex items-center justify-center gap-4 mt-6">
-            {(['shipping', 'payment', 'review'] as const).map((s, i) => (
+            {(['shipping', 'payment', 'review']).map((s, i) => (
               <div key={s} className="flex items-center gap-4">
                 <div className={cn(
                   'w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono transition-all duration-300',
-                  step === s
-                    ? 'bg-champagne-500 text-obsidian'
-                    : i < ['shipping', 'payment', 'review'].indexOf(step)
-                    ? 'bg-champagne-800 text-champagne-400'
+                  step === s ? 'bg-champagne-500 text-obsidian'
+                    : i < ['shipping', 'payment', 'review'].indexOf(step) ? 'bg-champagne-800 text-champagne-400'
                     : 'bg-obsidian-700 text-ivory/30 border border-ivory/10'
                 )}>
                   {i < ['shipping', 'payment', 'review'].indexOf(step) ? <Check size={12} /> : i + 1}
                 </div>
-                <span className={cn(
-                  'text-xs font-body uppercase tracking-widest',
-                  step === s ? 'text-champagne-400' : 'text-ivory/30'
-                )}>
+                <span className={cn('text-xs font-body uppercase tracking-widest', step === s ? 'text-champagne-400' : 'text-ivory/30')}>
                   {s}
                 </span>
                 {i < 2 && <div className="w-8 h-px bg-ivory/10" />}
@@ -197,40 +178,24 @@ export default function CheckoutPage() {
 
         <div className="container-luxury py-10">
           <div className="grid lg:grid-cols-3 gap-10">
-
-            {/* Left: Steps */}
             <div className="lg:col-span-2 space-y-6">
 
               {/* Step 1: Shipping */}
               <div className={cn('bg-white border transition-all', step === 'shipping' ? 'border-champagne-300' : 'border-sand-200')}>
-                <button
-                  className="w-full flex items-center justify-between p-6 text-left"
-                  onClick={() => step !== 'shipping' && setStep('shipping')}
-                >
+                <button className="w-full flex items-center justify-between p-6 text-left" onClick={() => step !== 'shipping' && setStep('shipping')}>
                   <div className="flex items-center gap-3">
-                    <div className={cn(
-                      'w-7 h-7 rounded-full flex items-center justify-center text-xs',
-                      step === 'shipping' ? 'bg-champagne-500 text-obsidian' : 'bg-green-100 text-green-700'
-                    )}>
+                    <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs', step === 'shipping' ? 'bg-champagne-500 text-obsidian' : 'bg-green-100 text-green-700')}>
                       {step === 'shipping' ? '1' : <Check size={12} />}
                     </div>
-                    <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">
-                      Shipping Information
-                    </span>
+                    <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">Shipping Information</span>
                   </div>
                   {step !== 'shipping' && shippingData && (
                     <span className="text-xs text-obsidian/40 font-body">{shippingData.city}, {shippingData.state}</span>
                   )}
                 </button>
-
                 <AnimatePresence>
                   {step === 'shipping' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <form onSubmit={handleSubmit(onShippingSubmit)} className="px-6 pb-6 space-y-5">
                         <div className="grid grid-cols-2 gap-5">
                           <div className="col-span-2 md:col-span-1">
@@ -276,10 +241,7 @@ export default function CheckoutPage() {
                             {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state.message}</p>}
                           </div>
                         </div>
-
-                        <button type="submit" className="btn-primary w-full justify-center mt-4">
-                          Continue to Payment
-                        </button>
+                        <button type="submit" className="btn-primary w-full justify-center mt-4">Continue to Payment</button>
                       </form>
                     </motion.div>
                   )}
@@ -288,48 +250,19 @@ export default function CheckoutPage() {
 
               {/* Step 2: Payment */}
               <div className={cn('bg-white border transition-all', step === 'payment' ? 'border-champagne-300' : 'border-sand-200', step === 'shipping' && 'opacity-60 pointer-events-none')}>
-                <button
-                  className="w-full flex items-center p-6 gap-3 text-left"
-                  onClick={() => step === 'review' && setStep('payment')}
-                >
-                  <div className={cn(
-                    'w-7 h-7 rounded-full flex items-center justify-center text-xs',
-                    step === 'payment' ? 'bg-champagne-500 text-obsidian'
-                    : step === 'review' ? 'bg-green-100 text-green-700'
-                    : 'bg-ivory-100 text-obsidian/30'
-                  )}>
+                <button className="w-full flex items-center p-6 gap-3 text-left" onClick={() => step === 'review' && setStep('payment')}>
+                  <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs', step === 'payment' ? 'bg-champagne-500 text-obsidian' : step === 'review' ? 'bg-green-100 text-green-700' : 'bg-ivory-100 text-obsidian/30')}>
                     {step === 'review' ? <Check size={12} /> : '2'}
                   </div>
-                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">
-                    Payment Method
-                  </span>
+                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">Payment Method</span>
                 </button>
-
                 <AnimatePresence>
                   {step === 'payment' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden px-6 pb-6"
-                    >
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden px-6 pb-6">
                       <div className="space-y-3 mb-6">
                         {PAYMENT_METHODS.map((pm) => (
-                          <label
-                            key={pm.id}
-                            className={cn(
-                              'flex items-center gap-4 p-4 border cursor-pointer transition-all duration-200',
-                              paymentMethod === pm.id ? 'border-champagne-400 bg-champagne-50/40' : 'border-sand-200 hover:border-sand-300'
-                            )}
-                          >
-                            <input
-                              type="radio"
-                              name="paymentMethod"
-                              value={pm.id}
-                              checked={paymentMethod === pm.id}
-                              onChange={() => setPaymentMethod(pm.id)}
-                              className="accent-champagne-500"
-                            />
+                          <label key={pm.id} className={cn('flex items-center gap-4 p-4 border cursor-pointer transition-all duration-200', paymentMethod === pm.id ? 'border-champagne-400 bg-champagne-50/40' : 'border-sand-200 hover:border-sand-300')}>
+                            <input type="radio" name="paymentMethod" value={pm.id} checked={paymentMethod === pm.id} onChange={() => setPaymentMethod(pm.id)} className="accent-champagne-500" />
                             <pm.icon size={20} className={cn(paymentMethod === pm.id ? 'text-champagne-600' : 'text-obsidian/40')} />
                             <div>
                               <div className="text-sm font-body font-medium text-obsidian">{pm.label}</div>
@@ -338,38 +271,21 @@ export default function CheckoutPage() {
                           </label>
                         ))}
                       </div>
-
-                      <button onClick={() => setStep('review')} className="btn-primary w-full justify-center">
-                        Review Order
-                      </button>
+                      <button onClick={() => setStep('review')} className="btn-primary w-full justify-center">Review Order</button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Step 3: Review & Place */}
+              {/* Step 3: Review */}
               <div className={cn('bg-white border transition-all', step === 'review' ? 'border-champagne-300' : 'border-sand-200', step !== 'review' && 'opacity-60 pointer-events-none')}>
                 <div className="flex items-center p-6 gap-3">
-                  <div className={cn(
-                    'w-7 h-7 rounded-full flex items-center justify-center text-xs',
-                    step === 'review' ? 'bg-champagne-500 text-obsidian' : 'bg-ivory-100 text-obsidian/30'
-                  )}>
-                    3
-                  </div>
-                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">
-                    Review & Place Order
-                  </span>
+                  <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs', step === 'review' ? 'bg-champagne-500 text-obsidian' : 'bg-ivory-100 text-obsidian/30')}>3</div>
+                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">Review & Place Order</span>
                 </div>
-
                 <AnimatePresence>
                   {step === 'review' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden px-6 pb-6"
-                    >
-                      {/* Shipping summary */}
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden px-6 pb-6">
                       {shippingData && (
                         <div className="bg-ivory-50 p-4 mb-6 text-sm font-body">
                           <div className="flex items-center justify-between mb-2">
@@ -382,31 +298,19 @@ export default function CheckoutPage() {
                           <div className="text-obsidian/60">{shippingData.phone}</div>
                         </div>
                       )}
-
-                      {/* Payment summary */}
                       <div className="bg-ivory-50 p-4 mb-6 text-sm font-body">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs uppercase tracking-wider text-obsidian/50">Payment</span>
                           <button onClick={() => setStep('payment')} className="text-xs text-champagne-700 hover:text-obsidian transition-colors">Edit</button>
                         </div>
-                        <div className="text-obsidian font-medium">
-                          {PAYMENT_METHODS.find(p => p.id === paymentMethod)?.label}
-                        </div>
+                        <div className="text-obsidian font-medium">{PAYMENT_METHODS.find(p => p.id === paymentMethod)?.label}</div>
                       </div>
-
                       <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 mb-6">
                         <Lock size={16} className="text-green-600 flex-shrink-0" />
-                        <p className="text-xs text-green-700 font-body">
-                          Your order is protected by SSL encryption. Payment details are never stored.
-                        </p>
+                        <p className="text-xs text-green-700 font-body">Your order is protected by SSL encryption.</p>
                       </div>
-
-                      <button
-                        onClick={handlePlaceOrder}
-                        disabled={processing}
-                        className={cn('btn-primary w-full justify-center text-base py-4', processing && 'opacity-70 cursor-not-allowed')}
-                      >
-                        {processing ? 'Processing...' : `Place Order · ₹${total.toLocaleString('en-IN')}`}
+                      <button onClick={handlePlaceOrder} disabled={processing} className={cn('btn-primary w-full justify-center text-base py-4', processing && 'opacity-70 cursor-not-allowed')}>
+                        {processing ? 'Processing...' : `Place Order · Rs.${total.toLocaleString('en-IN')}`}
                       </button>
                     </motion.div>
                   )}
@@ -414,53 +318,42 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Right: Order Summary */}
+            {/* Order Summary */}
             <div>
               <div className="bg-white border border-sand-200 sticky top-24">
-                <button
-                  className="w-full flex items-center justify-between p-5 border-b border-sand-100 lg:cursor-default"
-                  onClick={() => setOrderSummaryOpen(!orderSummaryOpen)}
-                >
-                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">
-                    Order Summary ({items.length})
-                  </span>
-                  <span className="lg:hidden text-obsidian/50">
-                    {orderSummaryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </span>
+                <button className="w-full flex items-center justify-between p-5 border-b border-sand-100" onClick={() => setOrderSummaryOpen(!orderSummaryOpen)}>
+                  <span className="font-body text-sm uppercase tracking-widest font-medium text-obsidian">Order Summary ({items.length})</span>
+                  <span className="lg:hidden text-obsidian/50">{orderSummaryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</span>
                 </button>
-
                 <div className={cn('lg:block', !orderSummaryOpen && 'hidden')}>
-                  {/* Items */}
                   <div className="p-5 space-y-4 max-h-72 overflow-y-auto">
                     {items.map(item => (
                       <div key={item.productId} className="flex gap-3">
                         <div className="relative w-14 h-14 bg-ivory-100 flex-shrink-0">
                           {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" sizes="56px" />}
-                          <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-obsidian text-ivory text-[10px] rounded-full flex items-center justify-center font-mono" style={{ width: 18, height: 18 }}>
+                          <span className="absolute -top-1.5 -right-1.5 bg-obsidian text-ivory text-[10px] rounded-full flex items-center justify-center font-mono" style={{ width: 18, height: 18 }}>
                             {item.quantity}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-body text-obsidian line-clamp-2">{item.name}</div>
-                          <div className="font-display text-sm text-obsidian mt-1">₹{(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                          <div className="font-display text-sm text-obsidian mt-1">Rs.{(item.price * item.quantity).toLocaleString('en-IN')}</div>
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  {/* Totals */}
                   <div className="border-t border-sand-100 p-5 space-y-3">
                     <div className="flex justify-between text-sm font-body text-obsidian/60">
                       <span>Subtotal</span>
-                      <span>₹{sub.toLocaleString('en-IN')}</span>
+                      <span>Rs.{sub.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between text-sm font-body text-obsidian/60">
                       <span>Shipping</span>
-                      <span className={shipping === 0 ? 'text-green-600' : ''}>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+                      <span className={shipping === 0 ? 'text-green-600' : ''}>{shipping === 0 ? 'Free' : `Rs.${shipping}`}</span>
                     </div>
                     <div className="flex justify-between items-baseline pt-3 border-t border-sand-100">
                       <span className="text-sm font-body font-medium text-obsidian">Total</span>
-                      <span className="font-display text-2xl text-obsidian">₹{total.toLocaleString('en-IN')}</span>
+                      <span className="font-display text-2xl text-obsidian">Rs.{total.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </div>
