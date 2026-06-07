@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -13,7 +13,7 @@ import { MarqueeBar } from '@/components/home/MarqueeBar';
 import { AnimatedSection } from '@/components/ui/AnimatedSection';
 import { cn } from '@/lib/utils';
 
-// ─── Mock data (replace with API calls) ───────────────────────────────────────
+// â”€â”€â”€ Mock data (replace with API calls) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const HERO_COLLECTIONS = [
   {
@@ -80,23 +80,23 @@ const TESTIMONIALS = [
     name: 'Shreya Nair',
     location: 'Bangalore',
     rating: 5,
-    text: 'I\'ve ordered four times now. The quality is unmatched — these are pieces you keep for generations. LUXORA has completely redefined my home aesthetic.',
+    text: 'I\'ve ordered four times now. The quality is unmatched â€” these are pieces you keep for generations. LUXORA has completely redefined my home aesthetic.',
     product: 'Onyx Sculpture',
     avatar: '/images/avatars/3.jpg',
   },
 ];
 
 const CATEGORIES = [
-  { name: 'Wall Decor', count: 48, slug: 'wall-decor', emoji: '🖼️' },
-  { name: 'Decorative Lights', count: 32, slug: 'decorative-lights', emoji: '✨' },
-  { name: 'Luxury Vases', count: 61, slug: 'luxury-vases', emoji: '🏺' },
-  { name: 'Sculptures', count: 29, slug: 'sculptures', emoji: '🗿' },
-  { name: 'Table Decor', count: 44, slug: 'table-decor', emoji: '🕯️' },
-  { name: 'Mirrors', count: 27, slug: 'mirrors', emoji: '🪞' },
-  { name: 'Premium Accessories', count: 53, slug: 'premium-accessories', emoji: '💎' },
+  { name: 'Wall Decor', count: 48, slug: 'wall-decor', emoji: 'ðŸ–¼ï¸' },
+  { name: 'Decorative Lights', count: 32, slug: 'decorative-lights', emoji: 'âœ¨' },
+  { name: 'Luxury Vases', count: 61, slug: 'luxury-vases', emoji: 'ðŸº' },
+  { name: 'Sculptures', count: 29, slug: 'sculptures', emoji: 'ðŸ—¿' },
+  { name: 'Table Decor', count: 44, slug: 'table-decor', emoji: 'ðŸ•¯ï¸' },
+  { name: 'Mirrors', count: 27, slug: 'mirrors', emoji: 'ðŸªž' },
+  { name: 'Premium Accessories', count: 53, slug: 'premium-accessories', emoji: 'ðŸ’Ž' },
 ];
 
-// ─── HERO SECTION ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ HERO SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -131,7 +131,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="label-gold text-champagne-400 mb-6"
         >
-          Est. 2024 · Premium Collection
+          Est. 2024 Â· Premium Collection
         </motion.div>
 
         <motion.h1
@@ -153,7 +153,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.65 }}
           className="text-ivory/60 text-lg font-body font-light max-w-xl mx-auto mb-12 tracking-wide"
         >
-          Curated luxury décor for the discerning eye. Each piece is an heirloom in the making.
+          Curated luxury dÃ©cor for the discerning eye. Each piece is an heirloom in the making.
         </motion.p>
 
         <motion.div
@@ -207,10 +207,10 @@ function HeroSection() {
   );
 }
 
-// ─── MARQUEE BAR ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ MARQUEE BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function LuxuryMarquee() {
-  const items = ['Free Shipping Over ₹2,999', 'Artisan Crafted', 'Premium Packaging', 'Hassle-Free Returns', 'Authenticity Guaranteed', 'Curated Luxury'];
+  const items = ['Free Shipping Over â‚¹2,999', 'Artisan Crafted', 'Premium Packaging', 'Hassle-Free Returns', 'Authenticity Guaranteed', 'Curated Luxury'];
   const doubled = [...items, ...items];
 
   return (
@@ -219,7 +219,7 @@ function LuxuryMarquee() {
         {doubled.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-4 mx-8 label-gold text-champagne-400 text-label-xs">
             {item}
-            <span className="text-champagne-700">✦</span>
+            <span className="text-champagne-700">âœ¦</span>
           </span>
         ))}
       </div>
@@ -227,7 +227,7 @@ function LuxuryMarquee() {
   );
 }
 
-// ─── CATEGORIES ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CategoriesSection() {
   return (
@@ -271,7 +271,7 @@ function CategoriesSection() {
   );
 }
 
-// ─── FEATURED COLLECTIONS ─────────────────────────────────────────────────────
+// â”€â”€â”€ FEATURED COLLECTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FeaturedCollections() {
   return (
@@ -328,7 +328,7 @@ function FeaturedCollections() {
   );
 }
 
-// ─── BEST SELLERS ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ BEST SELLERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function BestSellers() {
   return (
@@ -362,26 +362,26 @@ function BestSellers() {
   );
 }
 
-// ─── WHY LUXORA ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ WHY LUXORA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const WHY_FEATURES = [
   {
-    icon: '◈',
+    icon: 'â—ˆ',
     title: 'Artisan Crafted',
     desc: 'Every piece is handcrafted by skilled artisans using premium materials sourced from around the world.',
   },
   {
-    icon: '◇',
+    icon: 'â—‡',
     title: 'Curated Excellence',
     desc: 'Our team of luxury interior experts carefully selects each product to ensure it meets our exacting standards.',
   },
   {
-    icon: '◆',
+    icon: 'â—†',
     title: 'Premium Delivery',
     desc: 'White-glove packaging and careful logistics ensure your luxury pieces arrive in pristine condition.',
   },
   {
-    icon: '○',
+    icon: 'â—‹',
     title: 'Lifetime Authenticity',
     desc: 'Each piece comes with a certificate of authenticity and our commitment to genuine luxury craftsmanship.',
   },
@@ -405,7 +405,7 @@ function WhyLuxora() {
           </h2>
           <div className="divider-gold" />
           <p className="text-obsidian/60 max-w-xl mx-auto font-body">
-            More than décor — we deliver experiences that transform spaces into personal sanctuaries of refined living.
+            More than dÃ©cor â€” we deliver experiences that transform spaces into personal sanctuaries of refined living.
           </p>
         </div>
 
@@ -433,7 +433,7 @@ function WhyLuxora() {
   );
 }
 
-// ─── TESTIMONIALS ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ TESTIMONIALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Testimonials() {
   return (
@@ -477,7 +477,7 @@ function Testimonials() {
                 </div>
                 <div>
                   <div className="text-ivory text-sm font-body font-medium">{t.name}</div>
-                  <div className="text-ivory/40 text-xs font-mono">{t.location} · {t.product}</div>
+                  <div className="text-ivory/40 text-xs font-mono">{t.location} Â· {t.product}</div>
                 </div>
               </div>
 
@@ -502,7 +502,7 @@ function Testimonials() {
   );
 }
 
-// ─── INSPIRATION GALLERY ──────────────────────────────────────────────────────
+// â”€â”€â”€ INSPIRATION GALLERY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function InspirationGallery() {
   const items = Array.from({ length: 6 }, (_, i) => ({
@@ -556,7 +556,7 @@ function InspirationGallery() {
   );
 }
 
-// ─── PAGE EXPORT ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ PAGE EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function HomePage() {
   return (
@@ -577,3 +577,4 @@ export default function HomePage() {
     </>
   );
 }
+
