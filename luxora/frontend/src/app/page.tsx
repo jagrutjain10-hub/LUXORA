@@ -88,7 +88,7 @@ const TESTIMONIALS = [
 
 const CATEGORIES = [
   { name: 'Wall Decor', count: 48, slug: 'wall-decor', emoji: 'ðŸ–¼ï¸' },
-  { name: 'Decorative Lights', count: 32, slug: 'decorative-lights', emoji: 'âœ¨' },
+  { name: 'Decorative Lights', count: 32, slug: 'decorative-lights', emoji: '✦¨' },
   { name: 'Luxury Vases', count: 61, slug: 'luxury-vases', emoji: 'ðŸº' },
   { name: 'Sculptures', count: 29, slug: 'sculptures', emoji: 'ðŸ—¿' },
   { name: 'Table Decor', count: 44, slug: 'table-decor', emoji: 'ðŸ•¯ï¸' },
@@ -131,7 +131,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="label-gold text-champagne-400 mb-6"
         >
-          Est. 2024 Â· Premium Collection
+          Est. 2024 · Premium Collection
         </motion.div>
 
         <motion.h1
@@ -153,7 +153,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.65 }}
           className="text-ivory/60 text-lg font-body font-light max-w-xl mx-auto mb-12 tracking-wide"
         >
-          Curated luxury dÃ©cor for the discerning eye. Each piece is an heirloom in the making.
+          Curated luxury décor for the discerning eye. Each piece is an heirloom in the making.
         </motion.p>
 
         <motion.div
@@ -210,7 +210,7 @@ function HeroSection() {
 // â”€â”€â”€ MARQUEE BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function LuxuryMarquee() {
-  const items = ['Free Shipping Over â‚¹2,999', 'Artisan Crafted', 'Premium Packaging', 'Hassle-Free Returns', 'Authenticity Guaranteed', 'Curated Luxury'];
+  const items = ['Free Shipping Over ₹2,999', 'Artisan Crafted', 'Premium Packaging', 'Hassle-Free Returns', 'Authenticity Guaranteed', 'Curated Luxury'];
   const doubled = [...items, ...items];
 
   return (
@@ -219,7 +219,7 @@ function LuxuryMarquee() {
         {doubled.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-4 mx-8 label-gold text-champagne-400 text-label-xs">
             {item}
-            <span className="text-champagne-700">âœ¦</span>
+            <span className="text-champagne-700">✦¦</span>
           </span>
         ))}
       </div>
@@ -405,7 +405,7 @@ function WhyLuxora() {
           </h2>
           <div className="divider-gold" />
           <p className="text-obsidian/60 max-w-xl mx-auto font-body">
-            More than dÃ©cor â€” we deliver experiences that transform spaces into personal sanctuaries of refined living.
+            More than décor â€” we deliver experiences that transform spaces into personal sanctuaries of refined living.
           </p>
         </div>
 
@@ -477,7 +477,7 @@ function Testimonials() {
                 </div>
                 <div>
                   <div className="text-ivory text-sm font-body font-medium">{t.name}</div>
-                  <div className="text-ivory/40 text-xs font-mono">{t.location} Â· {t.product}</div>
+                  <div className="text-ivory/40 text-xs font-mono">{t.location} · {t.product}</div>
                 </div>
               </div>
 
