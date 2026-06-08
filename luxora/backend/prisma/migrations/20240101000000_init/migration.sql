@@ -1,190 +1,19 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('CUSTOMER', 'ADMIN', 'SUPER_ADMIN');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PACKED', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED');
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED', 'PARTIALLY_REFUNDED');
 CREATE TYPE "PaymentMethod" AS ENUM ('RAZORPAY', 'UPI', 'CREDIT_CARD', 'DEBIT_CARD', 'COD');
-
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
-    "phone" TEXT,
-    "role" "Role" NOT NULL DEFAULT 'CUSTOMER',
-    "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
-    "emailVerifyToken" TEXT,
-    "emailVerifyExpiry" TIMESTAMP(3),
-    "passwordResetToken" TEXT,
-    "passwordResetExpiry" TIMESTAMP(3),
-    "refreshToken" TEXT,
-    "avatarUrl" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "lastLoginAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Address" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "label" TEXT NOT NULL DEFAULT 'Home',
-    "fullName" TEXT NOT NULL,
-    "phone" TEXT NOT NULL,
-    "line1" TEXT NOT NULL,
-    "line2" TEXT,
-    "city" TEXT NOT NULL,
-    "state" TEXT NOT NULL,
-    "pincode" TEXT NOT NULL,
-    "country" TEXT NOT NULL DEFAULT 'India',
-    "isDefault" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Category" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "description" TEXT,
-    "imageUrl" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Product" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "shortDesc" TEXT,
-    "sku" TEXT NOT NULL,
-    "price" DECIMAL(10,2) NOT NULL,
-    "discountPrice" DECIMAL(10,2),
-    "categoryId" TEXT NOT NULL,
-    "stockQty" INTEGER NOT NULL DEFAULT 0,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "isFeatured" BOOLEAN NOT NULL DEFAULT false,
-    "isBestSeller" BOOLEAN NOT NULL DEFAULT false,
-    "weight" DOUBLE PRECISION,
-    "dimensions" JSONB,
-    "material" TEXT,
-    "careInstructions" TEXT,
-    "tags" TEXT[],
-    "metaTitle" TEXT,
-    "metaDescription" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "ProductImage" (
-    "id" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "altText" TEXT,
-    "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "isPrimary" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "ProductImage_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Review" (
-    "id" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "rating" INTEGER NOT NULL,
-    "title" TEXT,
-    "body" TEXT NOT NULL,
-    "isVerified" BOOLEAN NOT NULL DEFAULT false,
-    "isApproved" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "CartItem" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT,
-    "sessionId" TEXT,
-    "productId" TEXT NOT NULL,
-    "quantity" INTEGER NOT NULL DEFAULT 1,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "CartItem_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "WishlistItem" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "WishlistItem_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Order" (
-    "id" TEXT NOT NULL,
-    "orderNumber" TEXT NOT NULL,
-    "userId" TEXT,
-    "addressId" TEXT,
-    "guestEmail" TEXT,
-    "guestPhone" TEXT,
-    "subtotal" DECIMAL(10,2) NOT NULL,
-    "shippingCost" DECIMAL(10,2) NOT NULL DEFAULT 0,
-    "discountAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
-    "totalAmount" DECIMAL(10,2) NOT NULL,
-    "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
-    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
-    "paymentMethod" "PaymentMethod",
-    "notes" TEXT,
-    "couponCode" TEXT,
-    "trackingNumber" TEXT,
-    "shippedAt" TIMESTAMP(3),
-    "deliveredAt" TIMESTAMP(3),
-    "cancelledAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "OrderItem" (
-    "id" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "productName" TEXT NOT NULL,
-    "productSku" TEXT NOT NULL,
-    "imageUrl" TEXT,
-    "quantity" INTEGER NOT NULL,
-    "unitPrice" DECIMAL(10,2) NOT NULL,
-    "totalPrice" DECIMAL(10,2) NOT NULL,
-    CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "Payment" (
-    "id" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
-    "amount" DECIMAL(10,2) NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'INR',
-    "method" "PaymentMethod" NOT NULL,
-    "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
-    "gatewayOrderId" TEXT,
-    "gatewayPaymentId" TEXT,
-    "gatewaySignature" TEXT,
-    "failureReason" TEXT,
-    "refundId" TEXT,
-    "refundAmount" DECIMAL(10,2),
-    "paidAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
-);
-
--- Unique constraints
+CREATE TABLE "User" ("id" TEXT NOT NULL, "email" TEXT NOT NULL, "password" TEXT NOT NULL, "firstName" TEXT NOT NULL, "lastName" TEXT NOT NULL, "phone" TEXT, "role" "Role" NOT NULL DEFAULT 'CUSTOMER', "isEmailVerified" BOOLEAN NOT NULL DEFAULT false, "emailVerifyToken" TEXT, "emailVerifyExpiry" TIMESTAMP(3), "passwordResetToken" TEXT, "passwordResetExpiry" TIMESTAMP(3), "refreshToken" TEXT, "avatarUrl" TEXT, "isActive" BOOLEAN NOT NULL DEFAULT true, "lastLoginAt" TIMESTAMP(3), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "User_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Address" ("id" TEXT NOT NULL, "userId" TEXT NOT NULL, "label" TEXT NOT NULL DEFAULT 'Home', "fullName" TEXT NOT NULL, "phone" TEXT NOT NULL, "line1" TEXT NOT NULL, "line2" TEXT, "city" TEXT NOT NULL, "state" TEXT NOT NULL, "pincode" TEXT NOT NULL, "country" TEXT NOT NULL DEFAULT 'India', "isDefault" BOOLEAN NOT NULL DEFAULT false, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Address_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Category" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "slug" TEXT NOT NULL, "description" TEXT, "imageUrl" TEXT, "isActive" BOOLEAN NOT NULL DEFAULT true, "sortOrder" INTEGER NOT NULL DEFAULT 0, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Category_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Product" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "slug" TEXT NOT NULL, "description" TEXT NOT NULL, "shortDesc" TEXT, "sku" TEXT NOT NULL, "price" DECIMAL(10,2) NOT NULL, "discountPrice" DECIMAL(10,2), "categoryId" TEXT NOT NULL, "stockQty" INTEGER NOT NULL DEFAULT 0, "isActive" BOOLEAN NOT NULL DEFAULT true, "isFeatured" BOOLEAN NOT NULL DEFAULT false, "isBestSeller" BOOLEAN NOT NULL DEFAULT false, "weight" DOUBLE PRECISION, "dimensions" JSONB, "material" TEXT, "careInstructions" TEXT, "tags" TEXT[], "metaTitle" TEXT, "metaDescription" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Product_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ProductImage" ("id" TEXT NOT NULL, "productId" TEXT NOT NULL, "url" TEXT NOT NULL, "altText" TEXT, "sortOrder" INTEGER NOT NULL DEFAULT 0, "isPrimary" BOOLEAN NOT NULL DEFAULT false, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ProductImage_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Review" ("id" TEXT NOT NULL, "productId" TEXT NOT NULL, "userId" TEXT NOT NULL, "rating" INTEGER NOT NULL, "title" TEXT, "body" TEXT NOT NULL, "isVerified" BOOLEAN NOT NULL DEFAULT false, "isApproved" BOOLEAN NOT NULL DEFAULT false, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Review_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "CartItem" ("id" TEXT NOT NULL, "userId" TEXT, "sessionId" TEXT, "productId" TEXT NOT NULL, "quantity" INTEGER NOT NULL DEFAULT 1, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "CartItem_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "WishlistItem" ("id" TEXT NOT NULL, "userId" TEXT NOT NULL, "productId" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "WishlistItem_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Order" ("id" TEXT NOT NULL, "orderNumber" TEXT NOT NULL, "userId" TEXT, "addressId" TEXT, "guestEmail" TEXT, "guestPhone" TEXT, "subtotal" DECIMAL(10,2) NOT NULL, "shippingCost" DECIMAL(10,2) NOT NULL DEFAULT 0, "discountAmount" DECIMAL(10,2) NOT NULL DEFAULT 0, "totalAmount" DECIMAL(10,2) NOT NULL, "status" "OrderStatus" NOT NULL DEFAULT 'PENDING', "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING', "paymentMethod" "PaymentMethod", "notes" TEXT, "couponCode" TEXT, "trackingNumber" TEXT, "shippedAt" TIMESTAMP(3), "deliveredAt" TIMESTAMP(3), "cancelledAt" TIMESTAMP(3), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Order_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "OrderItem" ("id" TEXT NOT NULL, "orderId" TEXT NOT NULL, "productId" TEXT NOT NULL, "productName" TEXT NOT NULL, "productSku" TEXT NOT NULL, "imageUrl" TEXT, "quantity" INTEGER NOT NULL, "unitPrice" DECIMAL(10,2) NOT NULL, "totalPrice" DECIMAL(10,2) NOT NULL, CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Payment" ("id" TEXT NOT NULL, "orderId" TEXT NOT NULL, "amount" DECIMAL(10,2) NOT NULL, "currency" TEXT NOT NULL DEFAULT 'INR', "method" "PaymentMethod" NOT NULL, "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING', "gatewayOrderId" TEXT, "gatewayPaymentId" TEXT, "gatewaySignature" TEXT, "failureReason" TEXT, "refundId" TEXT, "refundAmount" DECIMAL(10,2), "paidAt" TIMESTAMP(3), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Payment_pkey" PRIMARY KEY ("id"));
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
 CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
@@ -194,28 +23,6 @@ CREATE UNIQUE INDEX "Review_productId_userId_key" ON "Review"("productId", "user
 CREATE UNIQUE INDEX "WishlistItem_userId_productId_key" ON "WishlistItem"("userId", "productId");
 CREATE UNIQUE INDEX "Order_orderNumber_key" ON "Order"("orderNumber");
 CREATE UNIQUE INDEX "Payment_orderId_key" ON "Payment"("orderId");
-
--- Indexes
-CREATE INDEX "User_email_idx" ON "User"("email");
-CREATE INDEX "User_role_idx" ON "User"("role");
-CREATE INDEX "Address_userId_idx" ON "Address"("userId");
-CREATE INDEX "Category_slug_idx" ON "Category"("slug");
-CREATE INDEX "Product_slug_idx" ON "Product"("slug");
-CREATE INDEX "Product_categoryId_idx" ON "Product"("categoryId");
-CREATE INDEX "ProductImage_productId_idx" ON "ProductImage"("productId");
-CREATE INDEX "Review_productId_isApproved_idx" ON "Review"("productId", "isApproved");
-CREATE INDEX "CartItem_userId_idx" ON "CartItem"("userId");
-CREATE INDEX "CartItem_sessionId_idx" ON "CartItem"("sessionId");
-CREATE INDEX "WishlistItem_userId_idx" ON "WishlistItem"("userId");
-CREATE INDEX "Order_userId_idx" ON "Order"("userId");
-CREATE INDEX "Order_orderNumber_idx" ON "Order"("orderNumber");
-CREATE INDEX "Order_status_idx" ON "Order"("status");
-CREATE INDEX "Order_createdAt_idx" ON "Order"("createdAt");
-CREATE INDEX "OrderItem_orderId_idx" ON "OrderItem"("orderId");
-CREATE INDEX "Payment_gatewayOrderId_idx" ON "Payment"("gatewayOrderId");
-CREATE INDEX "Payment_gatewayPaymentId_idx" ON "Payment"("gatewayPaymentId");
-
--- Foreign Keys
 ALTER TABLE "Address" ADD CONSTRAINT "Address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON UPDATE CASCADE;
 ALTER TABLE "ProductImage" ADD CONSTRAINT "ProductImage_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
