@@ -1,13 +1,8 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  secure: env.SMTP_PORT === 465,
-  auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -33,7 +28,6 @@ const baseTemplate = (content: string) => `
     .order-table th { background: #f5f0eb; padding: 10px 12px; text-align: left; color: #6a6a6a; font-weight: 500; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
     .order-table td { padding: 12px; border-bottom: 1px solid #f0ebe3; color: #2a2a2a; }
     .total-row td { font-weight: 600; color: #0f0f0f; border-bottom: none; }
-    .status-badge { display: inline-block; padding: 4px 12px; background: #f0ebe3; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #6a6a6a; }
   </style>
 </head>
 <body>
@@ -53,13 +47,11 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
-// ─── VERIFICATION EMAIL ───────────────────────────────────────────────────────
-
 export async function sendVerificationEmail(email: string, firstName: string, token: string) {
   const link = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
-  await transporter.sendMail({
-    from: env.EMAIL_FROM,
+  await resend.emails.send({
+    from: 'LUXORA <onboarding@resend.dev>',
     to: email,
     subject: 'Verify your LUXORA account',
     html: baseTemplate(`
@@ -75,13 +67,11 @@ export async function sendVerificationEmail(email: string, firstName: string, to
   logger.info(`Verification email sent to ${email}`);
 }
 
-// ─── PASSWORD RESET EMAIL ─────────────────────────────────────────────────────
-
 export async function sendPasswordResetEmail(email: string, firstName: string, token: string) {
   const link = `${env.FRONTEND_URL}/reset-password?token=${token}`;
 
-  await transporter.sendMail({
-    from: env.EMAIL_FROM,
+  await resend.emails.send({
+    from: 'LUXORA <onboarding@resend.dev>',
     to: email,
     subject: 'Reset your LUXORA password',
     html: baseTemplate(`
@@ -91,12 +81,10 @@ export async function sendPasswordResetEmail(email: string, firstName: string, t
       <div style="text-align:center;margin:32px 0">
         <a href="${link}" class="btn">Reset Password</a>
       </div>
-      <p style="font-size:13px;color:#8a8a8a">This link expires in 1 hour. If you did not request a password reset, please ignore this email. Your password will not be changed.</p>
+      <p style="font-size:13px;color:#8a8a8a">This link expires in 1 hour. If you did not request a password reset, please ignore this email.</p>
     `),
   });
 }
-
-// ─── ORDER CONFIRMATION EMAIL ─────────────────────────────────────────────────
 
 export async function sendOrderConfirmationEmail(email: string, firstName: string, order: any) {
   const itemRows = order.items.map((item: any) => `
@@ -107,8 +95,8 @@ export async function sendOrderConfirmationEmail(email: string, firstName: strin
     </tr>
   `).join('');
 
-  await transporter.sendMail({
-    from: env.EMAIL_FROM,
+  await resend.emails.send({
+    from: 'LUXORA <onboarding@resend.dev>',
     to: email,
     subject: `Order Confirmed — ${order.orderNumber}`,
     html: baseTemplate(`
