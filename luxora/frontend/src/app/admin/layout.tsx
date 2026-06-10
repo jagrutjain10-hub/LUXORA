@@ -24,15 +24,19 @@ const NAV_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
+    if (!mounted) return;
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, router, mounted]);
 
   const handleLogout = async () => {
     await authApi.logout().catch(() => null);
@@ -40,11 +44,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/');
   };
 
-  if (!user) return null;
+  if (!mounted) return <div style={{minHeight:'100vh',background:'#0f0f0f'}} />;
+  if (!user) return <div style={{minHeight:'100vh',background:'#0f0f0f'}} />;
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-champagne-900/30">
         <Link href="/admin/dashboard">
           <span className={cn(
@@ -61,7 +65,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 py-6 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
@@ -100,7 +103,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
 
-      {/* User */}
       <div className="p-4 border-t border-champagne-900/30">
         {sidebarOpen && (
           <div className="flex items-center gap-3 mb-4 px-1">
@@ -126,7 +128,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen bg-ivory-50 overflow-hidden">
-      {/* Desktop Sidebar */}
       <motion.aside
         animate={{ width: sidebarOpen ? 240 : 64 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
@@ -135,7 +136,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <SidebarContent />
       </motion.aside>
 
-      {/* Mobile Sidebar */}
       <AnimatePresence>
         {mobileSidebarOpen && (
           <>
@@ -159,12 +159,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Bar */}
         <header className="h-16 bg-white border-b border-sand-200 flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center gap-4">
-            {/* Toggle sidebar */}
             <button
               onClick={() => {
                 setSidebarOpen(!sidebarOpen);
@@ -175,7 +172,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu size={20} />
             </button>
 
-            {/* Breadcrumb */}
             <div className="hidden md:flex items-center gap-2 text-sm font-body">
               <Link href="/admin/dashboard" className="text-obsidian/40 hover:text-obsidian transition-colors">
                 Admin
@@ -202,7 +198,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {children}
         </main>
