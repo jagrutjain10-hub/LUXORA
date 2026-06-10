@@ -1,8 +1,16 @@
 'use client';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { useAuthStore, useWishlistStore } from '@/store/wishlist.store';
+
+function StoreHydrator() {
+  useEffect(() => {
+    useAuthStore.persist.rehydrate();
+    useWishlistStore.persist.rehydrate();
+  }, []);
+  return null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -14,9 +22,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       },
     },
   }));
-
   return (
     <QueryClientProvider client={queryClient}>
+      <StoreHydrator />
       {children}
       <Toaster
         position="top-center"

@@ -21,14 +21,8 @@ export const useWishlistStore = create<WishlistStore>()(
     }),
     {
       name: 'luxora-wishlist',
-      storage: createJSONStorage(() => {
-        if (typeof window !== 'undefined') return localStorage;
-        return {
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {},
-        };
-      }),
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
     }
   )
 );
@@ -62,15 +56,8 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'luxora-auth',
-      storage: createJSONStorage(() => {
-        if (typeof window !== 'undefined') return localStorage;
-        return {
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {},
-        };
-      }),
-      partialize: (state) => ({ user: state.user }),
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
     }
   )
 );
