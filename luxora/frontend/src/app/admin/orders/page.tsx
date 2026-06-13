@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
 const STATUS_OPTIONS = ['PENDING','CONFIRMED','PACKED','SHIPPED','DELIVERED','CANCELLED'];
-const STATUS_COLORS = { PENDING:'#f59e0b', CONFIRMED:'#3b82f6', PACKED:'#8b5cf6', SHIPPED:'#6366f1', DELIVERED:'#10b981', CANCELLED:'#ef4444' };
+const STATUS_COLORS: Record<string, string> = { PENDING:'#f59e0b', CONFIRMED:'#3b82f6', PACKED:'#8b5cf6', SHIPPED:'#6366f1', DELLED:'#ef4444' };
 
 export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
