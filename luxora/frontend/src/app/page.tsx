@@ -8,53 +8,39 @@ import { ArrowRight, Star, Quote, ChevronRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
+import { ProductCardSkeleton } from '@/components/product/ProductCardSkeleton';
 import { NewsletterSection } from '@/components/home/NewsletterSection';
 
 import { AnimatedSection } from '@/components/ui/AnimatedSection';
+import { useCategories, useBestSellers } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 
 // â”€â”€â”€ Mock data (replace with API calls) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const HERO_COLLECTIONS = [
   {
-    id: 'wall-decor',
-    title: 'Wall Decor',
+    id: 'wall-lamps',
+    title: 'Wall Lamps',
     subtitle: 'Artisan Statements',
-    href: '/products?category=wall-decor',
-    image: '/images/collections/wall-decor.jpg',
+    href: '/products?category=wall-lamps',
+    image: '/images/collections/wall-lamps.jpg',
   },
   {
-    id: 'sculptures',
-    title: 'Sculptures',
+    id: 'hangings',
+    title: 'Hangings',
     subtitle: 'Form & Presence',
-    href: '/products?category=sculptures',
-    image: '/images/collections/sculptures.jpg',
+    href: '/products?category=hangings',
+    image: '/images/collections/hangings.jpg',
   },
   {
-    id: 'luxury-vases',
-    title: 'Luxury Vases',
+    id: 'lamps',
+    title: 'Lamps',
     subtitle: 'Vessels of Elegance',
-    href: '/products?category=luxury-vases',
-    image: '/images/collections/vases.jpg',
+    href: '/products?category=lamps',
+    image: '/images/collections/lamps.jpg',
   },
 ];
 
-const MOCK_PRODUCTS = Array.from({ length: 8 }, (_, i) => ({
-  id: `product-${i}`,
-  name: ['Golden Hour Vase', 'Marble Arc Mirror', 'Onyx Sculpture', 'Woven Wall Panel',
-         'Crystal Candle Holder', 'Bronze Relief Frame', 'Silk Throw Pillow', 'Obsidian Bookend'][i],
-  slug: ['golden-hour-vase', 'marble-arc-mirror', 'onyx-sculpture', 'woven-wall-panel',
-         'crystal-candle-holder', 'bronze-relief-frame', 'silk-throw-pillow', 'obsidian-bookend'][i],
-  price: [12999, 24999, 34999, 8999, 6999, 18999, 4999, 9999][i],
-  discountPrice: [9999, 19999, null, null, 5499, 14999, null, 7999][i],
-  category: { name: ['Luxury Vases', 'Mirrors', 'Sculptures', 'Wall Decor',
-                       'Table Decor', 'Wall Decor', 'Premium Accessories', 'Sculptures'][i] },
-  images: [{ url: `/images/products/product-${i + 1}.jpg`, isPrimary: true }],
-  avgRating: [4.9, 4.8, 5.0, 4.7, 4.6, 4.9, 4.5, 4.8][i],
-  reviewCount: [142, 87, 203, 56, 98, 124, 41, 77][i],
-  isNew: i < 3,
-  stockQty: i === 3 ? 0 : 10,
-}));
 
 const TESTIMONIALS = [
   {
@@ -86,15 +72,6 @@ const TESTIMONIALS = [
   },
 ];
 
-const CATEGORIES = [
-  { name: 'Wall Decor', count: 48, slug: 'wall-decor', emoji: 'ðŸ–¼ï¸' },
-  { name: 'Decorative Lights', count: 32, slug: 'decorative-lights', emoji: '✦¨' },
-  { name: 'Luxury Vases', count: 61, slug: 'luxury-vases', emoji: 'ðŸº' },
-  { name: 'Sculptures', count: 29, slug: 'sculptures', emoji: 'ðŸ—¿' },
-  { name: 'Table Decor', count: 44, slug: 'table-decor', emoji: 'ðŸ•¯ï¸' },
-  { name: 'Mirrors', count: 27, slug: 'mirrors', emoji: 'ðŸªž' },
-  { name: 'Premium Accessories', count: 53, slug: 'premium-accessories', emoji: 'ðŸ’Ž' },
-];
 
 // â”€â”€â”€ HERO SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -230,6 +207,8 @@ function LuxuryMarquee() {
 // â”€â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CategoriesSection() {
+  const { data: categories, isLoading } = useCategories();
+
   return (
     <AnimatedSection className="section-py bg-ivory-100">
       <div className="container-luxury">
@@ -242,7 +221,11 @@ function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {CATEGORIES.map((cat, i) => (
+          {isLoading
+            ? Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="p-5 bg-white border border-sand-200 h-28 animate-pulse" />
+              ))
+            : (categories ?? []).map((cat, i) => (
             <motion.div
               key={cat.slug}
               initial={{ opacity: 0, y: 24 }}
@@ -255,12 +238,18 @@ function CategoriesSection() {
                 className="group flex flex-col items-center gap-3 p-5 bg-white border border-sand-200 
                            hover:border-champagne-500 hover:bg-champagne-50 transition-all duration-400 text-center"
               >
-                <span className="text-2xl">{cat.emoji}</span>
+                {cat.imageUrl ? (
+                  <div className="relative w-10 h-10 overflow-hidden rounded-full">
+                    <Image src={cat.imageUrl} alt={cat.name} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <span className="text-2xl text-champagne-500">◇</span>
+                )}
                 <div>
                   <div className="font-body text-xs font-medium text-obsidian uppercase tracking-wider mb-1 group-hover:text-champagne-700 transition-colors">
                     {cat.name}
                   </div>
-                  <div className="text-obsidian/40 text-xs font-mono">{cat.count} pieces</div>
+                  <div className="text-obsidian/40 text-xs font-mono">{cat._count.products} pieces</div>
                 </div>
               </Link>
             </motion.div>
@@ -331,6 +320,9 @@ function FeaturedCollections() {
 // â”€â”€â”€ BEST SELLERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function BestSellers() {
+  const { data, isLoading } = useBestSellers();
+  const products = data?.products ?? [];
+
   return (
     <AnimatedSection className="section-py bg-white">
       <div className="container-luxury">
@@ -344,19 +336,29 @@ function BestSellers() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-          {MOCK_PRODUCTS.slice(0, 8).map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.5 }}
-            >
-              <ProductCard product={product as any} />
-            </motion.div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <p className="text-obsidian/50 font-body text-center py-12">No best sellers yet — mark some products as best sellers in the admin panel.</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+            {products.slice(0, 8).map((product, i) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05, duration: 0.5 }}
+              >
+                <ProductCard product={product as any} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </AnimatedSection>
   );

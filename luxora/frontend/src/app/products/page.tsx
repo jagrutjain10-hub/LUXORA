@@ -9,7 +9,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductCardSkeleton } from '@/components/product/ProductCardSkeleton';
-import { useProducts } from '@/hooks/useProducts';
+import { useProducts, useCategories } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 
 const SORT_OPTIONS = [
@@ -26,16 +26,7 @@ const PRICE_RANGES = [
   { label: 'Above ₹30,000', min: 30000, max: 999999 },
 ];
 
-const CATEGORIES = [
-  { name: 'All', slug: '' },
-  { name: 'Wall Decor', slug: 'wall-decor' },
-  { name: 'Decorative Lights', slug: 'decorative-lights' },
-  { name: 'Luxury Vases', slug: 'luxury-vases' },
-  { name: 'Sculptures', slug: 'sculptures' },
-  { name: 'Table Decor', slug: 'table-decor' },
-  { name: 'Mirrors', slug: 'mirrors' },
-  { name: 'Premium Accessories', slug: 'premium-accessories' },
-];
+const ALL_CATEGORY = { name: 'All', slug: '' };
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
@@ -58,6 +49,8 @@ function ProductsPageContent() {
   };
 
   const { data, isLoading } = useProducts(params);
+  const { data: categoriesData } = useCategories();
+  const CATEGORIES = [ALL_CATEGORY, ...(categoriesData ?? []).map(c => ({ name: c.name, slug: c.slug }))];
 
   const updateParam = useCallback((key, value) => {
     const sp = new URLSearchParams(searchParams.toString());

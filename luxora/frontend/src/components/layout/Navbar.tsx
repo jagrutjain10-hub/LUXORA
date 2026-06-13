@@ -6,22 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, User, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/store/cart.store';
 import { useAuthStore } from '@/store/auth.store';
+import { useCategories } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 
-const NAV_LINKS = [
+const NAV_LINKS_BASE: { label: string; href: string; hasChildren?: boolean }[] = [
   {
     label: 'Collections',
     href: '/products',
-    children: [
-      { label: 'All Products', href: '/products' },
-      { label: 'Wall Decor', href: '/products?category=wall-decor' },
-      { label: 'Decorative Lights', href: '/products?category=decorative-lights' },
-      { label: 'Luxury Vases', href: '/products?category=luxury-vases' },
-      { label: 'Sculptures', href: '/products?category=sculptures' },
-      { label: 'Table Decor', href: '/products?category=table-decor' },
-      { label: 'Mirrors', href: '/products?category=mirrors' },
-      { label: 'Premium Accessories', href: '/products?category=premium-accessories' },
-    ],
+    hasChildren: true,
   },
   { label: 'Featured', href: '/products?featured=true' },
   { label: 'Best Sellers', href: '/products?bestSeller=true' },
@@ -37,7 +29,20 @@ export function Navbar() {
 
   const { items } = useCartStore();
   const { user } = useAuthStore();
+  const { data: categories } = useCategories();
   const cartCount = items.reduce((s, i) => s + i.quantity, 0);
+
+  const NAV_LINKS: { label: string; href: string; children?: { label: string; href: string }[] }[] = NAV_LINKS_BASE.map(link =>
+    link.hasChildren
+      ? {
+          ...link,
+          children: [
+            { label: 'All Products', href: '/products' },
+            ...(categories ?? []).map((c: { name: string; slug: string }) => ({ label: c.name, href: `/products?category=${c.slug}` })),
+          ],
+        }
+      : link
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);

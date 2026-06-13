@@ -3,16 +3,9 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Instagram, Facebook, Twitter, Youtube, MapPin, Phone, Mail } from 'lucide-react';
+import { useCategories } from '@/hooks/useProducts';
 
-const FOOTER_LINKS = {
-  'Collections': [
-    { label: 'Wall Decor', href: '/products?category=wall-decor' },
-    { label: 'Decorative Lights', href: '/products?category=decorative-lights' },
-    { label: 'Luxury Vases', href: '/products?category=luxury-vases' },
-    { label: 'Sculptures', href: '/products?category=sculptures' },
-    { label: 'Mirrors', href: '/products?category=mirrors' },
-    { label: 'Table Decor', href: '/products?category=table-decor' },
-  ],
+const STATIC_FOOTER_LINKS = {
   'Customer Care': [
     { label: 'My Account', href: '/dashboard' },
     { label: 'Track Order', href: '/dashboard/orders' },
@@ -45,6 +38,13 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const { data: categories } = useCategories();
+
+  const FOOTER_LINKS = {
+    Collections: (categories ?? []).map(c => ({ label: c.name, href: `/products?category=${c.slug}` })),
+    ...STATIC_FOOTER_LINKS,
+  };
+
   return (
     <footer className="bg-obsidian text-ivory">
       {/* Top band */}

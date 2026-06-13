@@ -85,6 +85,11 @@ export const authApi = {
   verifyEmail: (token: string) => api.get(`/auth/verify-email/${token}`),
 };
 
+export const categoryApi = {
+  list: () => api.get('/categories'),
+  get: (slug: string) => api.get(`/categories/${slug}`),
+};
+
 export const productApi = {
   list: (params: Record<string, any>) => api.get('/products', { params }),
   get: (slug: string) => api.get(`/products/${slug}`),

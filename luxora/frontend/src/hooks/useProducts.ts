@@ -1,7 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productApi, orderApi, adminApi, authApi } from '@/lib/api';
+import { productApi, orderApi, adminApi, authApi, categoryApi } from '@/lib/api';
 import { useAuthStore } from '@/store/wishlist.store';
 import toast from 'react-hot-toast';
+
+// ─── CATEGORIES ───────────────────────────────────────────────────────────────
+
+export function useCategories() {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data } = await categoryApi.list();
+      return data.data as Array<{
+        id: string; name: string; slug: string; description?: string;
+        imageUrl?: string; sortOrder: number; _count: { products: number };
+      }>;
+    },
+    staleTime: 5 * 60_000,
+  });
+}
 
 // ─── PRODUCTS ─────────────────────────────────────────────────────────────────
 
