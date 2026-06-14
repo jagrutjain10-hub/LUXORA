@@ -23,7 +23,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await api.get(`/products?search=${search}&limit=50`);
+      const { data } = await api.get(`/products?search=${search}&limit=200`);
       setProducts(data.data?.products ?? []);
     } catch { } finally { setLoading(false); }
   };
