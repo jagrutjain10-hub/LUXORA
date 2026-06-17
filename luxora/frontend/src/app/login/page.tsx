@@ -1,168 +1,150 @@
-// @ts-nocheck
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, ArrowRight, Loader } from 'lucide-react';
-import { useLogin } from '@/hooks/useProducts';
-import { cn } from '@/lib/utils';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { authApi } from '@/lib/api';
+import { useAuthStore } from '@/store/wishlist.store';
+import toast from 'react-hot-toast';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  rememberMe: z.boolean().default(false),
+const schema = z.object({
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
+  remember: z.boolean().optional(),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type FormData = z.infer<typeof schema>;
 
-function LoginForm() {
-  const [showPass, setShowPass] = useState(false);
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const { setAuth } = useAuthStore();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') ?? '/dashboard';
-  const sessionExpired = searchParams.get('session') === 'expired';
 
-  const { mutate: login, isPending } = useLogin();
-
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { remember: true },
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    login(data, {
-      onSuccess: () => router.push(redirectTo),
-    });
+  const onSubmit = async (data: FormData) => {
+    try {
+      const res = await authApi.login(data.email, data.password);
+      const { user, accessToken } = res.data.data;
+      setAuth(user, accessToken);
+      toast.success(`Welcome back, ${user.firstName}!`);
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Login failed';
+      toast.error(msg);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-obsidian flex">
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden"
-        style={{ background: 'radial-gradient(ellipse at 40% 60%, #2d1f0e 0%, #0a0a0a 70%)' }}
-      >
-        <div className="absolute inset-0 bg-noise opacity-40" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full border border-champagne-800/20" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full border border-champagne-800/10" />
-        <div className="relative z-10 text-center px-16">
-          <Link href="/">
-            <div className="font-display text-4xl text-ivory tracking-[0.4em] font-light mb-4">LUXORA</div>
-          </Link>
-          <div className="w-12 h-px bg-champagne-600 mx-auto mb-8" />
-          <p className="text-ivory/50 font-body text-lg leading-relaxed font-light italic">
-            "Where every space becomes a sanctuary of refined living."
-          </p>
-          <div className="mt-12 grid grid-cols-3 gap-6 text-center">
-            {[['2,400+', 'Products'], ['48K+', 'Clients'], ['4.9★', 'Rating']].map(([v, l]) => (
-              <div key={l}>
-                <div className="font-display text-2xl text-champagne-400 font-light">{v}</div>
-                <div className="text-ivory/30 text-xs font-body uppercase tracking-widest mt-1">{l}</div>
-              </div>
-            ))}
-          </div>
+    <div className="min-h-screen bg-obsidian flex flex-col lg:flex-row">
+      {/* Left panel - decorative, hidden on small mobile */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 relative overflow-hidden">
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse at 30% 60%, #2d1a0a 0%, #0a0a0a 70%)'
+        }} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+          <span className="font-display text-5xl xl:text-6xl text-ivory tracking-[0.4em] font-light mb-6">LUXORA</span>
+          <div className="w-12 h-px bg-champagne-500 mb-6" />
+          <p className="font-display text-ivory/50 text-xl font-light italic">Where Spaces Become Sanctuaries</p>
         </div>
+        {/* Decorative lines */}
+        <div className="absolute top-1/4 left-1/4 w-px h-1/3 bg-gradient-to-b from-transparent via-champagne-500/20 to-transparent" />
+        <div className="absolute bottom-1/4 right-1/3 w-px h-1/4 bg-gradient-to-t from-transparent via-champagne-500/15 to-transparent" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
-        >
-          <Link href="/" className="lg:hidden block text-center mb-10">
-            <span className="font-display text-3xl text-ivory tracking-[0.4em]">LUXORA</span>
-          </Link>
+      {/* Right panel - form */}
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen lg:min-h-0 px-6 py-12 sm:px-10">
+        {/* Mobile logo */}
+        <Link href="/" className="lg:hidden mb-10">
+          <span className="font-display text-3xl text-ivory tracking-[0.4em] font-light">LUXORA</span>
+        </Link>
 
-          <div className="mb-10">
-            <div className="label-gold text-champagne-400 mb-3">Welcome Back</div>
-            <h1 className="font-display text-display-sm text-ivory font-light">Sign In</h1>
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <p className="text-xs uppercase tracking-widest text-champagne-600 font-body mb-2">Welcome Back</p>
+            <h1 className="font-display text-3xl sm:text-4xl text-ivory font-light">Sign In</h1>
           </div>
 
-          {sessionExpired && (
-            <div className="mb-6 p-4 bg-amber-900/30 border border-amber-800/40 text-amber-300 text-sm font-body">
-              Your session expired. Please sign in again.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+            {/* Email */}
             <div>
-              <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-3">Email Address</label>
+              <label className="block text-xs uppercase tracking-widest text-ivory/40 font-body mb-2">
+                Email Address
+              </label>
               <input
                 {...register('email')}
                 type="email"
-                placeholder="hello@example.com"
-                className={cn(
-                  'w-full bg-transparent border-b py-3 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                  errors.email ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                )}
+                autoComplete="email"
+                className="w-full bg-white/5 border border-white/10 text-ivory px-4 py-3.5 text-base font-body focus:outline-none focus:border-champagne-500/50 placeholder:text-ivory/20 rounded-none"
+                placeholder="your@email.com"
+                style={{ fontSize: 16 }}
               />
-              {errors.email && <p className="text-red-400 text-xs mt-2">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-400 text-xs mt-1.5 font-body">{errors.email.message}</p>}
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-3">Password</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs uppercase tracking-widest text-ivory/40 font-body">Password</label>
+                <Link href="/forgot-password" className="text-xs text-champagne-600 hover:text-champagne-400 font-body transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   {...register('password')}
-                  type={showPass ? 'text' : 'password'}
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  className="w-full bg-white/5 border border-white/10 text-ivory px-4 py-3.5 pr-12 text-base font-body focus:outline-none focus:border-champagne-500/50 placeholder:text-ivory/20 rounded-none"
                   placeholder="••••••••"
-                  className={cn(
-                    'w-full bg-transparent border-b py-3 pr-10 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                    errors.password ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                  )}
+                  style={{ fontSize: 16 }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-ivory/30 hover:text-ivory/60 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-ivory/30 hover:text-ivory/60 transition-colors"
                 >
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-400 text-xs mt-2">{errors.password.message}</p>}
+              {errors.password && <p className="text-red-400 text-xs mt-1.5 font-body">{errors.password.message}</p>}
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <input {...register('rememberMe')} type="checkbox" className="accent-champagne-500 w-4 h-4" />
-                <span className="text-sm font-body text-ivory/50">Remember me</span>
-              </label>
-              <Link href="/forgot-password" className="text-sm font-body text-champagne-500 hover:text-champagne-400 transition-colors">
-                Forgot password?
-              </Link>
-            </div>
+            {/* Remember */}
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input {...register('remember')} type="checkbox" className="accent-champagne-500 w-4 h-4" />
+              <span className="text-sm text-ivory/50 font-body group-hover:text-ivory/70 transition-colors">Remember me</span>
+            </label>
 
+            {/* Submit */}
             <button
               type="submit"
-              disabled={isPending}
-              className="w-full py-4 bg-champagne-500 text-obsidian font-body text-sm uppercase tracking-widest
-                         hover:bg-champagne-400 disabled:opacity-60 transition-all duration-200 flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className="w-full bg-champagne-600 text-obsidian py-4 text-xs uppercase tracking-widest font-body font-medium hover:bg-champagne-500 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 min-h-[52px]"
             >
-              {isPending ? <Loader size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-              {isPending ? 'Signing In...' : 'Sign In'}
+              {isSubmitting ? 'Signing in...' : (<>Sign In <ArrowRight size={14} /></>)}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm font-body text-ivory/40">
-            Don't have an account?{' '}
-            <Link href="/register" className="text-champagne-500 hover:text-champagne-400 transition-colors">
+          <p className="text-center text-ivory/30 text-sm font-body mt-8">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="text-champagne-400 hover:text-champagne-300 transition-colors">
               Create Account
             </Link>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-obsidian" />}>
-      <LoginForm />
-    </Suspense>
   );
 }

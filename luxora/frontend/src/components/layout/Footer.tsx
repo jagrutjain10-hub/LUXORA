@@ -1,116 +1,80 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Instagram, Facebook, Twitter, Youtube, MapPin, Phone, Mail } from 'lucide-react';
-import { useCategories } from '@/hooks/useProducts';
+import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
-const STATIC_FOOTER_LINKS = {
-  'Customer Care': [
-    { label: 'My Account', href: '/dashboard' },
-    { label: 'Track Order', href: '/dashboard/orders' },
-    { label: 'Returns & Exchanges', href: '/returns' },
-    { label: 'Shipping Policy', href: '/shipping' },
-    { label: 'FAQs', href: '/faq' },
-    { label: 'Contact Us', href: '/contact' },
+const FOOTER_LINKS = {
+  Shop: [
+    { label: 'All Products', href: '/products' },
+    { label: 'Chandeliers', href: '/products?category=chandeliers' },
+    { label: 'Wall Lamps', href: '/products?category=wall-lamps' },
+    { label: 'Lamps', href: '/products?category=lamps' },
+    { label: 'Hangings', href: '/products?category=hangings' },
+    { label: 'Lights', href: '/products?category=lights' },
   ],
-  'Company': [
-    { label: 'About LUXORA', href: '/about' },
-    { label: 'Our Story', href: '/about#story' },
-    { label: 'Sustainability', href: '/sustainability' },
-    { label: 'Press & Media', href: '/press' },
-    { label: 'Careers', href: '/careers' },
+  Company: [
+    { label: 'About Us', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'FAQ', href: '/faq' },
     { label: 'Blog', href: '/blog' },
   ],
-  'Legal': [
+  Support: [
+    { label: 'Shipping Policy', href: '/shipping' },
+    { label: 'Returns & Refunds', href: '/refunds' },
+    { label: 'Track Order', href: '/dashboard' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-    { label: 'Refund Policy', href: '/refunds' },
   ],
 };
 
-const SOCIALS = [
-  { icon: Instagram, href: 'https://instagram.com/luxora.in', label: 'Instagram' },
-  { icon: Facebook, href: 'https://facebook.com/luxora.in', label: 'Facebook' },
-  { icon: Twitter, href: 'https://twitter.com/luxora_in', label: 'Twitter' },
-  { icon: Youtube, href: 'https://youtube.com/@luxora', label: 'YouTube' },
-];
-
 export function Footer() {
-  const { data: categories } = useCategories();
-
-  const FOOTER_LINKS = {
-    Collections: (categories ?? []).map(c => ({ label: c.name, href: `/products?category=${c.slug}` })),
-    ...STATIC_FOOTER_LINKS,
-  };
-
   return (
     <footer className="bg-obsidian text-ivory">
-      {/* Top band */}
-      <div className="border-b border-champagne-900/30">
-        <div className="container-luxury py-16">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="label-gold text-champagne-400 mb-4">Stay Connected</div>
-              <h3 className="font-display text-display-sm text-ivory font-light mb-3">
-                Join the LUXORA Circle
-              </h3>
-              <p className="text-ivory/50 font-body text-sm max-w-md">
-                Exclusive previews, styling inspiration, and early access to new collections — delivered elegantly to your inbox.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-1 bg-transparent border border-champagne-800/50 px-5 py-3.5
-                           text-ivory text-sm font-body placeholder:text-ivory/30
-                           focus:outline-none focus:border-champagne-500 transition-colors"
-              />
-              <button className="btn-ghost whitespace-nowrap">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Main Footer */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
 
-      {/* Main footer links */}
-      <div className="container-luxury py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
-          {/* Brand column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <div className="font-display text-2xl text-ivory tracking-[0.35em] font-light mb-4">
-              LUXORA
-            </div>
-            <p className="text-ivory/40 text-sm font-body leading-relaxed mb-6">
-              Premium decorative items &amp; luxury home décor for the discerning home.
+          {/* Brand */}
+          <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+            <Link href="/">
+              <span className="font-display text-2xl tracking-[0.3em] text-ivory font-light">LUXORA</span>
+            </Link>
+            <p className="mt-4 text-ivory/50 font-body text-sm leading-relaxed max-w-xs">
+              Curated luxury décor for the discerning eye. Each piece is an heirloom in the making.
             </p>
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center gap-3 text-ivory/50 text-sm font-body">
-                <MapPin size={14} className="text-champagne-600 flex-shrink-0" />
-                <span>Mumbai, Maharashtra, India</span>
-              </div>
-              <div className="flex items-center gap-3 text-ivory/50 text-sm font-body">
-                <Phone size={14} className="text-champagne-600 flex-shrink-0" />
-                <span>+91 98765 43210</span>
-              </div>
-              <div className="flex items-center gap-3 text-ivory/50 text-sm font-body">
-                <Mail size={14} className="text-champagne-600 flex-shrink-0" />
-                <span>hello@luxora.in</span>
-              </div>
+
+            {/* Contact */}
+            <div className="mt-6 space-y-2.5">
+              {[
+                { icon: Mail, text: 'hello@luxora.in', href: 'mailto:hello@luxora.in' },
+                { icon: Phone, text: '+91 98765 43210', href: 'tel:+919876543210' },
+                { icon: MapPin, text: 'Mumbai, India', href: null },
+              ].map(({ icon: Icon, text, href }) => (
+                <div key={text} className="flex items-center gap-2.5 text-ivory/40 text-sm font-body">
+                  <Icon size={13} className="flex-shrink-0 text-champagne-600" />
+                  {href ? (
+                    <a href={href} className="hover:text-champagne-400 transition-colors">{text}</a>
+                  ) : (
+                    <span>{text}</span>
+                  )}
+                </div>
+              ))}
             </div>
-            <div className="flex gap-3">
-              {SOCIALS.map(({ icon: Icon, href, label }) => (
+
+            {/* Social */}
+            <div className="mt-6 flex gap-3">
+              {[
+                { icon: Instagram, href: 'https://instagram.com/luxora.in', label: 'Instagram' },
+                { icon: Facebook, href: '#', label: 'Facebook' },
+                { icon: Twitter, href: '#', label: 'Twitter' },
+              ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-9 h-9 border border-champagne-800/50 flex items-center justify-center
-                             text-ivory/50 hover:text-champagne-400 hover:border-champagne-600 transition-all duration-300"
+                  className="w-9 h-9 border border-white/10 flex items-center justify-center text-ivory/40 hover:text-champagne-400 hover:border-champagne-700 transition-all"
                 >
                   <Icon size={15} />
                 </a>
@@ -118,18 +82,18 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Link columns */}
-          {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
-            <div key={heading}>
-              <h4 className="label-gold text-champagne-500 mb-5">{heading}</h4>
-              <ul className="space-y-3">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
+          {/* Links */}
+          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+            <div key={title}>
+              <h4 className="font-body text-xs uppercase tracking-widest text-ivory/60 mb-4">{title}</h4>
+              <ul className="space-y-2.5">
+                {links.map(link => (
+                  <li key={link.href}>
                     <Link
-                      href={href}
-                      className="text-ivory/45 text-sm font-body hover:text-ivory transition-colors duration-200 tracking-wide"
+                      href={link.href}
+                      className="text-ivory/40 hover:text-champagne-400 transition-colors font-body text-sm"
                     >
-                      {label}
+                      {link.label}
                     </Link>
                   </li>
                 ))}
@@ -137,22 +101,46 @@ export function Footer() {
             </div>
           ))}
         </div>
+
+        {/* Newsletter */}
+        <div className="mt-12 pt-10 border-t border-white/8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h4 className="font-display text-xl font-light text-ivory mb-1">Stay in the know</h4>
+              <p className="text-ivory/40 font-body text-sm">New arrivals, exclusive offers, and interior inspiration.</p>
+            </div>
+            <div className="flex w-full sm:w-auto max-w-sm gap-0">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 bg-white/5 border border-white/10 px-4 py-3 text-ivory text-sm font-body placeholder:text-ivory/30 focus:outline-none focus:border-champagne-600/50 min-w-0"
+                style={{ fontSize: 16 }}
+              />
+              <button className="bg-champagne-600 text-obsidian px-5 py-3 text-xs uppercase tracking-widest font-body font-medium hover:bg-champagne-500 transition-colors whitespace-nowrap flex-shrink-0">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-champagne-900/20">
-        <div className="container-luxury py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-ivory/30 text-xs font-body tracking-wide">
+      {/* Bottom Bar */}
+      <div className="border-t border-white/8">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-ivory/30 font-body text-xs text-center sm:text-left">
             © {new Date().getFullYear()} LUXORA. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            {['Visa', 'Mastercard', 'UPI', 'Razorpay'].map(pm => (
-              <span key={pm} className="text-ivory/25 text-xs font-mono tracking-wider">{pm}</span>
+          <div className="flex items-center gap-4">
+            {['Privacy', 'Terms', 'Cookies'].map(item => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                className="text-ivory/30 hover:text-ivory/60 font-body text-xs transition-colors"
+              >
+                {item}
+              </Link>
             ))}
           </div>
-          <p className="text-ivory/20 text-xs font-body">
-            Made with care in India 🇮🇳
-          </p>
         </div>
       </div>
     </footer>
