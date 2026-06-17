@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const res = await authApi.login(data.email, data.password);
+      const res = await authApi.login({ email: data.email, password: data.password });
       const { user, accessToken } = res.data.data;
       setAuth(user, accessToken);
       toast.success(`Welcome back, ${user.firstName}!`);
