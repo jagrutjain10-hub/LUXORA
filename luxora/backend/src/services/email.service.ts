@@ -1,8 +1,9 @@
-import { Resend } from 'resend';
+import * as Brevo from '@getbrevo/brevo';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -24,57 +25,57 @@ const baseTemplate = (content: string) => `
     p { font-size: 15px; color: #3a3a3a; line-height: 1.8; margin-bottom: 16px; font-family: sans-serif; }
     .btn { display: inline-block; background: #c9a96e; color: #0f0f0f; padding: 14px 36px; text-decoration: none; font-family: sans-serif; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; margin: 16px 0; }
     .divider { border: none; border-top: 1px solid #e8e0d5; margin: 32px 0; }
-    .order-table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }
-    .order-table th { background: #f5f0eb; padding: 10px 12px; text-align: left; color: #6a6a6a; font-weight: 500; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
-    .order-table td { padding: 12px; border-bottom: 1px solid #f0ebe3; color: #2a2a2a; }
-    .total-row td { font-weight: 600; color: #0f0f0f; border-bottom: none; }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <div class="header">
       <div class="logo">LUXORA</div>
-      <div class="tagline">Luxury Home Décor</div>
+      <div class="tagline">Luxury Home Decor</div>
     </div>
     <div class="body">${content}</div>
     <div class="footer">
-      <p>LUXORA — Premium Decorative Items & Home Décor</p>
+      <p>LUXORA - Premium Decorative Items & Home Decor</p>
       <p>© ${new Date().getFullYear()} Luxora. All rights reserved.</p>
-      <p style="margin-top:8px;color:#3a3a3a;">hello@luxora.in · +91 98765 43210</p>
+      <p style="margin-top:8px;color:#3a3a3a;">hello@luxora.in</p>
     </div>
   </div>
 </body>
 </html>
 `;
 
+async function sendEmail(to: string, subject: string, html: string) {
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = html;
+  sendSmtpEmail.sender = { name: 'LUXORA', email: 'luxora2010@gmail.com' };
+  sendSmtpEmail.to = [{ email: to }];
+  await apiInstance.sendTransacEmail(sendSmtpEmail);
+}
+
 export async function sendVerificationEmail(email: string, firstName: string, token: string) {
   const link = `${env.FRONTEND_URL}/verify-email?token=${token}`;
-
-  await resend.emails.send({
-    from: 'LUXORA <onboarding@resend.dev>',
-    to: email,
-    subject: 'Verify your LUXORA account',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    'Verify your LUXORA account',
+    baseTemplate(`
       <h2>Welcome to LUXORA, ${firstName}</h2>
       <p>Thank you for creating your account. Please verify your email address to access the full LUXORA experience.</p>
       <div style="text-align:center;margin:32px 0">
         <a href="${link}" class="btn">Verify Email Address</a>
       </div>
       <p style="font-size:13px;color:#8a8a8a">This link expires in 24 hours. If you did not create a LUXORA account, you can safely ignore this email.</p>
-    `),
-  });
-
+    `)
+  );
   logger.info(`Verification email sent to ${email}`);
 }
 
 export async function sendPasswordResetEmail(email: string, firstName: string, token: string) {
   const link = `${env.FRONTEND_URL}/reset-password?token=${token}`;
-
-  await resend.emails.send({
-    from: 'LUXORA <onboarding@resend.dev>',
-    to: email,
-    subject: 'Reset your LUXORA password',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    'Reset your LUXORA password',
+    baseTemplate(`
       <h2>Password Reset</h2>
       <p>Hello ${firstName},</p>
       <p>We received a request to reset your LUXORA account password. Click below to set a new password.</p>
@@ -82,55 +83,44 @@ export async function sendPasswordResetEmail(email: string, firstName: string, t
         <a href="${link}" class="btn">Reset Password</a>
       </div>
       <p style="font-size:13px;color:#8a8a8a">This link expires in 1 hour. If you did not request a password reset, please ignore this email.</p>
-    `),
-  });
+    `)
+  );
 }
 
 export async function sendOrderConfirmationEmail(email: string, firstName: string, order: any) {
   const itemRows = order.items.map((item: any) => `
     <tr>
-      <td>${item.productName}</td>
-      <td style="text-align:center">${item.quantity}</td>
-      <td style="text-align:right">₹${Number(item.totalPrice).toLocaleString('en-IN')}</td>
+      <td style="padding:12px;border-bottom:1px solid #f0ebe3">${item.productName}</td>
+      <td style="padding:12px;border-bottom:1px solid #f0ebe3;text-align:center">${item.quantity}</td>
+      <td style="padding:12px;border-bottom:1px solid #f0ebe3;text-align:right">Rs.${Number(item.totalPrice).toLocaleString('en-IN')}</td>
     </tr>
   `).join('');
 
-  await resend.emails.send({
-    from: 'LUXORA <onboarding@resend.dev>',
-    to: email,
-    subject: `Order Confirmed — ${order.orderNumber}`,
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    `Order Confirmed - ${order.orderNumber}`,
+    baseTemplate(`
       <h2>Order Confirmed</h2>
       <p>Hello ${firstName},</p>
       <p>Your LUXORA order has been confirmed and is being prepared with care.</p>
       <hr class="divider">
-      <p><strong style="font-family:sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Order Number</strong><br>
-        <span style="font-size:18px;color:#c9a96e;font-family:sans-serif">${order.orderNumber}</span>
-      </p>
-      <table class="order-table" style="margin-top:24px">
+      <p><strong>Order Number:</strong> ${order.orderNumber}</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:16px">
         <thead>
-          <tr>
-            <th>Item</th>
-            <th style="text-align:center">Qty</th>
-            <th style="text-align:right">Amount</th>
+          <tr style="background:#f5f0eb">
+            <th style="padding:10px 12px;text-align:left;font-size:12px">Item</th>
+            <th style="padding:10px 12px;text-align:center;font-size:12px">Qty</th>
+            <th style="padding:10px 12px;text-align:right;font-size:12px">Amount</th>
           </tr>
         </thead>
         <tbody>
           ${itemRows}
-          <tr class="total-row">
-            <td colspan="2">Shipping</td>
-            <td style="text-align:right">${Number(order.shippingCost) === 0 ? 'Free' : '₹' + Number(order.shippingCost)}</td>
-          </tr>
-          <tr class="total-row" style="background:#f5f0eb">
-            <td colspan="2"><strong>Total</strong></td>
-            <td style="text-align:right"><strong>₹${Number(order.totalAmount).toLocaleString('en-IN')}</strong></td>
+          <tr>
+            <td colspan="2" style="padding:12px;font-weight:600">Total</td>
+            <td style="padding:12px;text-align:right;font-weight:600">Rs.${Number(order.totalAmount).toLocaleString('en-IN')}</td>
           </tr>
         </tbody>
       </table>
-      <hr class="divider">
-      <div style="text-align:center">
-        <a href="${env.FRONTEND_URL}/dashboard/orders/${order.id}" class="btn">Track Your Order</a>
-      </div>
-    `),
-  });
+    `)
+  );
 }
