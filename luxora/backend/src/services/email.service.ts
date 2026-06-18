@@ -1,9 +1,10 @@
-import { TransactionalEmailsApi, SendSmtpEmail, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+import axios from 'axios';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
-const apiInstance = new TransactionalEmailsApi();
-apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
+const BREVO_API_KEY = process.env.BREVO_API_KEY || '';
+const SENDER_EMAIL = 'luxora2010@gmail.com';
+const SENDER_NAME = 'LUXORA';
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -44,13 +45,23 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
-async function sendEmail(to: string, subject: string, html: string) {
-  const sendSmtpEmail = new SendSmtpEmail();
-  sendSmtpEmail.subject = subject;
-  sendSmtpEmail.htmlContent = html;
-  sendSmtpEmail.sender = { name: 'LUXORA', email: 'luxora2010@gmail.com' };
-  sendSmtpEmail.to = [{ email: to }];
-  await apiInstance.sendTransacEmail(sendSmtpEmail);
+async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  await axios.post(
+    'https://api.brevo.com/v3/smtp/email',
+    {
+      sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    },
+    {
+      headers: {
+        'accept': 'application/json',
+        'api-key': BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+    }
+  );
 }
 
 export async function sendVerificationEmail(email: string, firstName: string, token: string) {
