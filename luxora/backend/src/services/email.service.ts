@@ -1,9 +1,9 @@
-import * as Brevo from '@getbrevo/brevo';
+import { TransactionalEmailsApi, SendSmtpEmail, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
-const apiInstance = new Brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
+const apiInstance = new TransactionalEmailsApi();
+apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -21,7 +21,7 @@ const baseTemplate = (content: string) => `
     .body { padding: 48px 40px; }
     .footer { background: #0f0f0f; padding: 24px 40px; text-align: center; }
     .footer p { color: #5a5a5a; font-size: 12px; line-height: 1.8; font-family: sans-serif; }
-    h2 { font-size: 22px; color: #0f0f0f; margin-bottom: 16px; font-weight: 400; letter-spacing: 0.05em; }
+    h2 { font-size: 22px; color: #0f0f0f; margin-bottom: 16px; font-weight: 400; }
     p { font-size: 15px; color: #3a3a3a; line-height: 1.8; margin-bottom: 16px; font-family: sans-serif; }
     .btn { display: inline-block; background: #c9a96e; color: #0f0f0f; padding: 14px 36px; text-decoration: none; font-family: sans-serif; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; margin: 16px 0; }
     .divider { border: none; border-top: 1px solid #e8e0d5; margin: 32px 0; }
@@ -45,7 +45,7 @@ const baseTemplate = (content: string) => `
 `;
 
 async function sendEmail(to: string, subject: string, html: string) {
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  const sendSmtpEmail = new SendSmtpEmail();
   sendSmtpEmail.subject = subject;
   sendSmtpEmail.htmlContent = html;
   sendSmtpEmail.sender = { name: 'LUXORA', email: 'luxora2010@gmail.com' };
