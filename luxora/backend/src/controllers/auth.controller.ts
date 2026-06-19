@@ -20,7 +20,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const verifyToken = crypto.randomBytes(32).toString('hex');
-    const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const user = await prisma.user.create({
       data: {
@@ -29,17 +29,19 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         email,
         password: hashedPassword,
         phone,
+        isEmailVerified: true,
         emailVerifyToken: crypto.createHash('sha256').update(verifyToken).digest('hex'),
         emailVerifyExpiry: verifyExpiry,
       },
       select: { id: true, email: true, firstName: true, lastName: true },
     });
 
-    await sendVerificationEmail(user.email, user.firstName, verifyToken);
+    // Non-blocking — don't fail registration if email fails
+    sendVerificationEmail(user.email, user.firstName, verifyToken).catch(() => {});
 
     res.status(201).json({
       success: true,
-      message: 'Account created. Please verify your email to continue.',
+      message: 'Account created successfully. You can now log in.',
       data: { userId: user.id },
     });
   } catch (err) {
@@ -192,7 +194,6 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
     const { email } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Always return success to prevent email enumeration
     if (!user) {
       return res.json({ success: true, message: 'If an account exists, a reset link has been sent.' });
     }
@@ -204,11 +205,12 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
       where: { id: user.id },
       data: {
         passwordResetToken: hashedToken,
-        passwordResetExpiry: new Date(Date.now() + 60 * 60 * 1000), // 1h
+        passwordResetExpiry: new Date(Date.now() + 60 * 60 * 1000),
       },
     });
 
-    await sendPasswordResetEmail(user.email, user.firstName, resetToken);
+    // Non-blocking
+    sendPasswordResetEmail(user.email, user.firstName, resetToken).catch(() => {});
 
     res.json({ success: true, message: 'If an account exists, a reset link has been sent.' });
   } catch (err) {
@@ -242,7 +244,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
         password: hashedPassword,
         passwordResetToken: null,
         passwordResetExpiry: null,
-        refreshToken: null, // Invalidate all sessions
+        refreshToken: null,
       },
     });
 
