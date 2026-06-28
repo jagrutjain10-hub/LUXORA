@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Navbar } from '@/components/layout/Navbar';
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -20,8 +21,7 @@ function ResetPasswordForm() {
     setLoading(true);
     try {
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/reset-password/' + token, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       });
       const data = await res.json();
@@ -32,46 +32,54 @@ function ResetPasswordForm() {
   };
 
   return (
-    <main style={{minHeight:'100vh',background:'#0a0a0a',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px'}}>
-      <div style={{width:'100%',maxWidth:'400px'}}>
-        <Link href="/" style={{display:'block',textAlign:'center',marginBottom:'48px',textDecoration:'none'}}>
-          <span style={{fontFamily:'var(--font-cormorant)',fontSize:'28px',color:'#f5f0e8',letterSpacing:'0.4em',fontWeight:300}}>LUXORA</span>
-        </Link>
-        {done ? (
-          <div style={{textAlign:'center'}}>
-            <div style={{fontSize:'48px',marginBottom:'16px',color:'#c9a96e'}}>✓</div>
-            <h2 style={{fontFamily:'var(--font-cormorant)',fontSize:'1.5rem',color:'#f5f0e8',fontWeight:300,marginBottom:'12px'}}>Password Reset!</h2>
-            <p style={{color:'rgba(245,240,232,0.5)',fontFamily:'var(--font-jost)',fontSize:'14px'}}>Redirecting to sign in...</p>
-          </div>
-        ) : (
-          <>
-            <h1 style={{fontFamily:'var(--font-cormorant)',fontSize:'2rem',color:'#f5f0e8',fontWeight:300,marginBottom:'8px'}}>New Password</h1>
-            <p style={{color:'rgba(245,240,232,0.5)',fontFamily:'var(--font-jost)',fontSize:'14px',marginBottom:'40px'}}>Enter your new password below.</p>
-            {error && <div style={{background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.3)',color:'#fca5a5',padding:'12px 16px',marginBottom:'24px',fontFamily:'var(--font-jost)',fontSize:'13px'}}>{error}</div>}
-            <form onSubmit={handleSubmit}>
-              {[['New Password', password, setPassword], ['Confirm Password', confirm, setConfirm]].map(([label, val, setter]: any) => (
-                <div key={label as string} style={{marginBottom:'24px'}}>
-                  <label style={{display:'block',fontSize:'11px',letterSpacing:'0.2em',textTransform:'uppercase',color:'rgba(245,240,232,0.5)',fontFamily:'var(--font-jost)',marginBottom:'12px'}}>{label}</label>
-                  <input type="password" required value={val} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value)} style={{width:'100%',background:'transparent',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'12px 0',color:'#f5f0e8',fontFamily:'var(--font-jost)',fontSize:'14px',outline:'none'}} placeholder="••••••••" />
+    <>
+      <Navbar />
+      <main className="pt-[var(--nav-height)] min-h-screen bg-obsidian flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Link href="/" className="block text-center mb-12">
+            <span className="font-display text-2xl text-ivory tracking-[0.35em] font-light">LUXORA</span>
+          </Link>
+          {done ? (
+            <div className="text-center">
+              <div className="font-display text-5xl text-champagne-400 mb-4">✓</div>
+              <h2 className="font-display text-2xl text-ivory font-light mb-2">Password Reset!</h2>
+              <p className="font-body text-ivory/50 text-sm">Redirecting to sign in...</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="font-display text-3xl text-ivory font-light mb-2">New Password</h1>
+              <p className="font-body text-ivory/50 text-sm mb-10">Enter your new password below.</p>
+              {error && <div className="bg-red-900/20 border border-red-800/30 text-red-400 p-4 mb-6 font-body text-sm">{error}</div>}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {[['New Password', password, setPassword], ['Confirm Password', confirm, setConfirm]].map(([label, val, setter]: any) => (
+                  <div key={label as string}>
+                    <label className="label-gold text-ivory/40 block mb-3">{label}</label>
+                    <input
+                      type="password" required value={val}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value)}
+                      className="w-full bg-transparent border-0 border-b border-ivory/20 pb-3 text-ivory font-body text-sm focus:outline-none focus:border-champagne-500 transition-colors"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                ))}
+                <button type="submit" disabled={loading} className="btn-ghost w-full justify-center">
+                  {loading ? 'Resetting...' : 'Reset Password'}
+                </button>
+                <div className="text-center">
+                  <Link href="/login" className="font-body text-ivory/40 text-sm hover:text-ivory/70 transition-colors">Back to Sign In</Link>
                 </div>
-              ))}
-              <button type="submit" disabled={loading} style={{width:'100%',background:'#c9a96e',color:'#0a0a0a',padding:'16px',border:'none',fontSize:'11px',letterSpacing:'0.15em',textTransform:'uppercase',fontFamily:'var(--font-jost)',cursor:'pointer',marginBottom:'24px',opacity:loading?0.7:1}}>
-                {loading ? 'Resetting...' : 'Reset Password'}
-              </button>
-              <div style={{textAlign:'center'}}>
-                <Link href="/login" style={{color:'rgba(245,240,232,0.4)',fontFamily:'var(--font-jost)',fontSize:'13px',textDecoration:'none'}}>Back to Sign In</Link>
-              </div>
-            </form>
-          </>
-        )}
-      </div>
-    </main>
+              </form>
+            </>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div style={{minHeight:'100vh',background:'#0a0a0a'}} />}>
+    <Suspense fallback={<div className="min-h-screen bg-obsidian" />}>
       <ResetPasswordForm />
     </Suspense>
   );

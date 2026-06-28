@@ -1,85 +1,66 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { authApi } from '@/lib/api';
-import toast from 'react-hot-toast';
-
-const schema = z.object({ email: z.string().email('Enter a valid email') });
+import { Navbar } from '@/components/layout/Navbar';
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(schema),
-  });
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async ({ email }: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      await authApi.forgotPassword(email);
+      await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
       setSent(true);
-    } catch {
-      toast.error('Something went wrong. Please try again.');
-    }
+    } catch {}
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-obsidian flex items-center justify-center p-8">
-      <div className="w-full max-w-md">
-        <Link href="/" className="block text-center mb-10">
-          <span className="font-display text-3xl text-ivory tracking-[0.4em]">LUXORA</span>
-        </Link>
-
-        {sent ? (
-          <div className="text-center">
-            <div className="w-16 h-16 border border-champagne-600/40 flex items-center justify-center mx-auto mb-6">
-              <span className="text-champagne-400 text-2xl">✓</span>
+    <>
+      <Navbar />
+      <main className="pt-[var(--nav-height)] min-h-screen bg-obsidian flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Link href="/" className="block text-center mb-12">
+            <span className="font-display text-2xl text-ivory tracking-[0.35em] font-light">LUXORA</span>
+          </Link>
+          {sent ? (
+            <div className="text-center">
+              <div className="font-display text-5xl text-champagne-400 mb-4">✉</div>
+              <h2 className="font-display text-2xl text-ivory font-light mb-3">Check Your Email</h2>
+              <p className="font-body text-ivory/50 text-sm mb-8">If an account exists, a reset link has been sent.</p>
+              <Link href="/login" className="label-gold text-champagne-400 hover:text-champagne-300 transition-colors">Back to Sign In</Link>
             </div>
-            <h2 className="font-display text-2xl text-ivory font-light mb-3">Check your inbox</h2>
-            <p className="text-ivory/50 font-body text-sm mb-8">
-              If an account exists for that email, we have sent a password reset link.
-            </p>
-            <Link href="/login" className="text-champagne-400 text-sm font-body hover:text-champagne-300 transition-colors">
-              Back to sign in
-            </Link>
-          </div>
-        ) : (
-          <>
-            <h2 className="font-display text-3xl text-ivory font-light mb-2">Reset Password</h2>
-            <p className="text-ivory/50 font-body text-sm mb-8">
-              Enter your email and we will send you a reset link.
-            </p>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-ivory/40 font-body mb-2">
-                  Email Address
-                </label>
-                <input
-                  {...register('email')}
-                  type="email"
-                  className="w-full bg-white/5 border border-white/10 text-ivory px-4 py-3 text-sm font-body focus:outline-none focus:border-champagne-500/50 placeholder:text-ivory/20"
-                  placeholder="your@email.com"
-                />
-                {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message as string}</p>}
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-champagne-600 text-obsidian py-3.5 text-xs uppercase tracking-widest font-body font-medium hover:bg-champagne-500 transition-colors disabled:opacity-60"
-              >
-                {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-              </button>
-            </form>
-            <p className="text-center text-ivory/30 text-sm font-body mt-6">
-              Remember your password?{' '}
-              <Link href="/login" className="text-champagne-400 hover:text-champagne-300 transition-colors">
-                Sign in
-              </Link>
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+          ) : (
+            <>
+              <h1 className="font-display text-3xl text-ivory font-light mb-2">Reset Password</h1>
+              <p className="font-body text-ivory/50 text-sm mb-10">Enter your email and we will send a reset link.</p>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="label-gold text-ivory/40 block mb-3">Email Address</label>
+                  <input
+                    type="email" required value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full bg-transparent border-0 border-b border-ivory/20 pb-3 text-ivory font-body text-sm focus:outline-none focus:border-champagne-500 transition-colors"
+                    placeholder="hello@example.com"
+                  />
+                </div>
+                <button type="submit" disabled={loading} className="btn-ghost w-full justify-center">
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+                <div className="text-center">
+                  <Link href="/login" className="font-body text-ivory/40 text-sm hover:text-ivory/70 transition-colors">Back to Sign In</Link>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
