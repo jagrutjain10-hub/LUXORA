@@ -341,7 +341,7 @@ function UpiPaymentStep({
                         }}
                       />
                       {/* Fallback if no QR image */}
-                      <div className="text-xs text-obsidian/40 font-body text-center px-2 z-0">
+                      <div className="text-xs text-obsidian/40 font-body text-center px-2 z-0 hidden">
                         <ImageIcon size={32} className="mx-auto mb-2 text-sand-400" />
                         <p>QR Code</p>
                         <p className="text-[10px]">Add upi-qr.png to public/images/</p>
