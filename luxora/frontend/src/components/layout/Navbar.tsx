@@ -74,7 +74,7 @@ export function Navbar() {
       <nav
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-          isTransparent
+          (!scrolled && !mobileOpen && pathname === '/')
             ? 'bg-transparent'
             : 'bg-white/95 backdrop-blur-xl shadow-[0_1px_0_rgba(0,0,0,0.06)]'
         )}
@@ -86,7 +86,7 @@ export function Navbar() {
           <Link href="/" className="flex-shrink-0" onClick={closeMobile}>
             <span className={cn(
               'font-display font-light tracking-[0.3em] text-lg sm:text-xl transition-colors duration-300',
-              isTransparent ? 'text-ivory' : 'text-obsidian'
+              (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory' : 'text-obsidian'
             )}>
               LUXORA
             </span>
@@ -105,7 +105,7 @@ export function Navbar() {
                   href={link.href}
                   className={cn(
                     'nav-link flex items-center gap-1 py-2 transition-colors duration-300',
-                    isTransparent ? 'text-ivory/80 hover:text-ivory' : 'text-obsidian/70 hover:text-obsidian'
+                    (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory/80 hover:text-ivory' : 'text-obsidian/70 hover:text-obsidian'
                   )}
                 >
                   {link.label}
@@ -146,7 +146,7 @@ export function Navbar() {
               onClick={() => setSearchOpen(true)}
               className={cn(
                 'w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-colors rounded-none',
-                isTransparent ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
+                (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
               )}
               aria-label="Search"
             >
@@ -157,7 +157,7 @@ export function Navbar() {
             <Link href="/wishlist" aria-label="Wishlist"
               className={cn(
                 'hidden sm:flex w-10 h-10 sm:w-11 sm:h-11 items-center justify-center transition-colors',
-                isTransparent ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
+                (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
               )}
             >
               <Heart size={18} />
@@ -167,7 +167,7 @@ export function Navbar() {
             <Link href="/cart" aria-label="Cart" className="relative">
               <div className={cn(
                 'w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-colors',
-                isTransparent ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
+                (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
               )}>
                 <ShoppingBag size={18} />
               </div>
@@ -186,7 +186,7 @@ export function Navbar() {
               href={user ? '/dashboard' : '/login'}
               className={cn(
                 'hidden sm:flex w-10 h-10 sm:w-11 sm:h-11 items-center justify-center transition-colors',
-                isTransparent ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
+                (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory hover:bg-ivory/10' : 'text-obsidian hover:bg-obsidian/5'
               )}
               aria-label={user ? 'Dashboard' : 'Login'}
             >
@@ -205,7 +205,7 @@ export function Navbar() {
               onClick={() => setMobileOpen(!mobileOpen)}
               className={cn(
                 'lg:hidden w-10 h-10 flex items-center justify-center ml-1 transition-colors',
-                isTransparent ? 'text-ivory' : 'text-obsidian'
+                (!scrolled && !mobileOpen && pathname === '/') ? 'text-ivory' : 'text-obsidian'
               )}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
