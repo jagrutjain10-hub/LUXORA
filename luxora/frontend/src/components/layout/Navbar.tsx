@@ -59,7 +59,7 @@ export function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  const isTransparent = !scrolled && !mobileOpen;
+  const pathname = usePathname();
   const closeMobile = () => { setMobileOpen(false); setMobileExpanded(null); };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
