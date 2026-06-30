@@ -1,196 +1,86 @@
 'use client';
-
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Tag } from 'lucide-react';
-import { useCartStore } from '@/store/cart.store';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { useCartStore } from '@/store/cart.store';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotal, total } = useCartStore();
-
+  const { items, updateQty, removeItem, subtotal } = useCartStore();
   const sub = subtotal();
   const shipping = sub >= 2999 ? 0 : 199;
-  const grandTotal = sub + shipping;
+  const total = sub + shipping;
 
   return (
     <>
       <Navbar />
-      <main className="pt-[var(--nav-height)] min-h-screen bg-ivory-50">
-        {/* Header */}
-        <div className="bg-obsidian py-12 section-px text-center">
-          <div className="label-gold text-champagne-400 mb-2">Your Selection</div>
-          <h1 className="font-display text-display-md text-ivory font-light">Shopping Cart</h1>
-        </div>
-
-        <div className="container-luxury py-12">
-          {items.length === 0 ? (
-            <div className="text-center py-24">
-              <div className="font-display text-8xl text-sand-200 mb-6">◇</div>
-              <h2 className="font-display text-3xl text-obsidian font-light mb-3">Your cart is empty</h2>
-              <p className="text-obsidian/50 font-body mb-10">Discover our curated collections to find something exceptional.</p>
-              <Link href="/products" className="btn-primary">
-                <ShoppingBag size={16} /> Explore Collections
-              </Link>
-            </div>
-          ) : (
-            <div className="grid lg:grid-cols-3 gap-10">
-              {/* Cart Items */}
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-sand-200">
-                  <span className="text-sm font-body text-obsidian/60 uppercase tracking-widest">
-                    {items.length} {items.length === 1 ? 'Item' : 'Items'}
-                  </span>
-                  <button
-                    onClick={() => useCartStore.getState().clearCart()}
-                    className="text-xs text-obsidian/40 font-body uppercase tracking-widest hover:text-red-500 transition-colors"
-                  >
-                    Clear All
-                  </button>
-                </div>
-
-                <AnimatePresence>
-                  {items.map((item) => (
-                    <motion.div
-                      key={item.productId}
-                      layout
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -20, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex gap-5 bg-white p-5 border border-sand-200"
-                    >
-                      {/* Image */}
-                      <div className="relative w-24 h-24 flex-shrink-0 bg-ivory-100">
-                        {item.image ? (
-                          <Image src={item.image} alt={item.name} fill className="object-cover" sizes="96px" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ShoppingBag size={20} className="text-sand-400" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3">
-                          <Link
-                            href={`/products/${item.slug}`}
-                            className="font-body text-sm font-medium text-obsidian hover:text-champagne-700 transition-colors leading-snug"
-                          >
-                            {item.name}
-                          </Link>
-                          <button
-                            onClick={() => removeItem(item.productId)}
-                            className="text-obsidian/30 hover:text-red-500 transition-colors flex-shrink-0"
-                            aria-label="Remove item"
-                          >
-                            <X size={16} />
-                          </button>
+      <main className="pt-[var(--nav-height)]">
+        <section style={{ background:'#0a0a0a' }} className="py-16 sm:py-24 text-center section-px">
+          <p className="label-gold mb-4" style={{ color:'#c9a96e' }}>Your Selections</p>
+          <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2.5rem,6vw,4.5rem)',lineHeight:1.1 }}>Shopping Cart</h1>
+          <div style={{ width:48,height:1,background:'#c9a96e',margin:'24px auto 0' }} />
+        </section>
+        <section style={{ background:'#faf7f2' }} className="section-py section-px">
+          <div className="container-luxury">
+            {items.length === 0 ? (
+              <div className="text-center py-20">
+                <ShoppingBag size={48} style={{ color:'#e8dfd0',margin:'0 auto 20px' }} />
+                <h2 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,fontSize:28,color:'#0a0a0a',marginBottom:12 }}>Your cart is empty</h2>
+                <p style={{ fontFamily:'var(--font-jost)',color:'rgba(10,10,10,0.5)',marginBottom:28,fontSize:15 }}>Discover our curated collection of luxury home decor.</p>
+                <Link href="/products" className="btn-primary">Browse Collection</Link>
+              </div>
+            ) : (
+              <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+                <div className="lg:col-span-2 space-y-4">
+                  <AnimatePresence>
+                    {items.map((item:any) => (
+                      <motion.div key={item.productId} layout initial={{ opacity:0,y:12 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0,y:-12 }}
+                        style={{ background:'#fff',border:'1px solid #e8dfd0',display:'flex',gap:16,padding:'16px' }}>
+                        <div style={{ position:'relative',width:80,height:80,flexShrink:0,background:'#f5f0e8' }}>
+                          {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />}
                         </div>
-
-                        <div className="mt-4 flex items-center justify-between">
-                          {/* Quantity */}
-                          <div className="flex items-center border border-sand-200">
-                            <button
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                              className="w-8 h-8 flex items-center justify-center text-obsidian/50 hover:text-obsidian transition-colors"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span className="w-8 text-center text-sm font-mono">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center text-obsidian/50 hover:text-obsidian transition-colors"
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
-
-                          {/* Price */}
-                          <div className="font-display text-lg text-obsidian">
-                            ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                        <div style={{ flex:1,minWidth:0 }}>
+                          <p style={{ fontFamily:'var(--font-jost)',fontSize:14,fontWeight:500,color:'#0a0a0a',marginBottom:4 }} className="line-clamp-2">{item.name}</p>
+                          <p style={{ fontFamily:'var(--font-cormorant)',fontSize:20,color:'#0a0a0a',marginBottom:12 }}>₹{item.price.toLocaleString('en-IN')}</p>
+                          <div className="flex items-center justify-between">
+                            <div style={{ display:'flex',alignItems:'center',border:'1px solid #e8dfd0' }}>
+                              <button onClick={()=>updateQty(item.productId,item.quantity-1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Minus size={12}/></button>
+                              <span style={{ width:36,textAlign:'center',fontFamily:'var(--font-jost)',fontSize:14,color:'#0a0a0a' }}>{item.quantity}</span>
+                              <button onClick={()=>updateQty(item.productId,item.quantity+1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Plus size={12}/></button>
+                            </div>
+                            <button onClick={()=>removeItem(item.productId)} style={{ color:'rgba(10,10,10,0.3)',background:'none',border:'none',cursor:'pointer',padding:4 }} className="hover:text-red-500 transition-colors"><Trash2 size={15}/></button>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-
-              {/* Order Summary */}
-              <div className="space-y-4">
-                <div className="bg-white border border-sand-200 p-6">
-                  <h2 className="font-display text-xl text-obsidian font-medium mb-6">Order Summary</h2>
-
-                  <div className="space-y-4 pb-6 border-b border-sand-100">
-                    <div className="flex justify-between text-sm font-body">
-                      <span className="text-obsidian/60">Subtotal ({items.length} items)</span>
-                      <span className="text-obsidian">₹{sub.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-sm font-body">
-                      <span className="text-obsidian/60">Shipping</span>
-                      {shipping === 0 ? (
-                        <span className="text-green-600 font-medium">Free</span>
-                      ) : (
-                        <span className="text-obsidian">₹{shipping}</span>
-                      )}
-                    </div>
-                    {shipping > 0 && (
-                      <div className="bg-champagne-50 px-4 py-3 text-xs font-body text-champagne-800">
-                        Add ₹{(2999 - sub).toLocaleString('en-IN')} more for free shipping
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between items-baseline py-5">
-                    <span className="font-body font-medium text-obsidian">Total</span>
-                    <span className="font-display text-3xl text-obsidian font-light">
-                      ₹{grandTotal.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-
-                  <Link href="/checkout" className="btn-primary w-full justify-center">
-                    Proceed to Checkout <ArrowRight size={16} />
-                  </Link>
-
-                  <Link href="/products" className="btn-secondary w-full justify-center mt-3">
-                    Continue Shopping
-                  </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
-
-                {/* Coupon */}
-                <div className="bg-white border border-sand-200 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag size={15} className="text-champagne-600" />
-                    <span className="text-sm font-body font-medium text-obsidian">Coupon Code</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Enter code"
-                      className="flex-1 border border-sand-200 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-champagne-400"
-                    />
-                    <button className="px-4 bg-obsidian text-ivory text-xs font-body uppercase tracking-wider hover:bg-champagne-600 hover:text-obsidian transition-colors">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-
-                {/* Trust badges */}
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {['🔒 Secure', '📦 Insured', '↩ 15-Day Return'].map(badge => (
-                    <div key={badge} className="bg-white border border-sand-200 p-3 text-xs font-body text-obsidian/60">
-                      {badge}
+                <div>
+                  <div style={{ background:'#fff',border:'1px solid #e8dfd0',padding:'28px 24px',position:'sticky',top:'calc(var(--nav-height) + 24px)' }}>
+                    <h2 style={{ fontFamily:'var(--font-cormorant)',fontWeight:400,fontSize:22,color:'#0a0a0a',marginBottom:20 }}>Order Summary</h2>
+                    <div className="space-y-3" style={{ fontFamily:'var(--font-jost)',fontSize:14 }}>
+                      <div className="flex justify-between" style={{ color:'rgba(10,10,10,0.6)' }}><span>Subtotal</span><span>₹{sub.toLocaleString('en-IN')}</span></div>
+                      <div className="flex justify-between" style={{ color:'rgba(10,10,10,0.6)' }}><span>Shipping</span><span style={{ color:shipping===0?'#6b7280':'inherit' }}>{shipping===0?'Free':`₹${shipping}`}</span></div>
+                      {shipping>0 && <p style={{ fontSize:11,color:'rgba(10,10,10,0.4)',marginTop:4 }}>Free shipping on orders above ₹2,999</p>}
+                      <div style={{ borderTop:'1px solid #e8dfd0',paddingTop:16,marginTop:4 }} className="flex justify-between items-center">
+                        <span style={{ fontWeight:500,color:'#0a0a0a' }}>Total</span>
+                        <span style={{ fontFamily:'var(--font-cormorant)',fontSize:26,color:'#0a0a0a' }}>₹{total.toLocaleString('en-IN')}</span>
+                      </div>
                     </div>
-                  ))}
+                    <Link href="/checkout" className="btn-primary w-full justify-center mt-6" style={{ marginTop:24 }}>
+                      Proceed to Checkout <ArrowRight size={14} />
+                    </Link>
+                    <Link href="/products" className="btn-secondary w-full justify-center mt-3" style={{ marginTop:12,fontSize:11 }}>
+                      Continue Shopping
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </section>
       </main>
       <Footer />
     </>

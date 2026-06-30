@@ -2,53 +2,52 @@
 import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const FAQS = [
-  { q: 'How long does delivery take?', a: 'Standard delivery takes 5–7 business days. Express delivery is available in 2–3 days for select pin codes. White glove delivery can be scheduled for luxury pieces.' },
-  { q: 'Can I return a product?', a: 'Yes, we accept returns within 15 days of delivery. Items must be unused and in original packaging. Contact hello@luxora.in with your order number to initiate a return.' },
-  { q: 'Are your products authentic?', a: 'Every LUXORA piece comes with a certificate of authenticity. We work directly with verified artisans, manufacturers, and curated luxury brands.' },
-  { q: 'How do I track my order?', a: 'Once shipped, you will receive a tracking number via email. You can also track your order in your dashboard under "My Orders".' },
-  { q: 'Do you offer gift wrapping?', a: 'All LUXORA orders come in premium packaging. For special gift presentation, contact us at hello@luxora.in before placing your order.' },
-  { q: 'What payment methods do you accept?', a: 'We accept UPI, credit/debit cards, and net banking via Razorpay. All transactions are secured with industry-standard encryption.' },
-  { q: 'Can I customize a product?', a: 'Some products can be customized. Please contact hello@luxora.in with your requirements and we will advise on possibilities and timelines.' },
+  { q:'How do I place an order?', a:'Browse our collection, add items to your cart, and proceed to checkout. You can pay securely via UPI or other payment methods.' },
+  { q:'What is your return policy?', a:'We accept returns within 7 days of delivery for items in original, unused condition. Contact hello@luxora.in to initiate a return.' },
+  { q:'Do you offer free shipping?', a:'Yes! All orders above ₹2,999 qualify for free standard shipping across India. Orders below this attract a flat ₹199 shipping fee.' },
+  { q:'How long does delivery take?', a:'Standard delivery takes 5-7 business days. Express delivery (2-3 days) is available for select pin codes at checkout.' },
+  { q:'Are your products authentic?', a:'Absolutely. Every LUXORA product is sourced directly from verified artisans and manufacturers. We guarantee 100% authenticity.' },
+  { q:'Can I track my order?', a:'Yes. Once dispatched, you will receive a tracking number via email to monitor your order status in real time.' },
+  { q:'Do you ship internationally?', a:'Currently we ship within India only. International shipping is coming soon — subscribe to our newsletter for updates.' },
+  { q:'How do I contact customer support?', a:'Email us at hello@luxora.in or call +91 98765 43210. We respond within 24 hours on business days.' },
 ];
 
-export default function FaqPage() {
-  const [open, setOpen] = useState<number | null>(0);
+export default function FAQPage() {
+  const [open, setOpen] = useState<number|null>(null);
   return (
     <>
       <Navbar />
-      <main className="pt-[var(--nav-height)] min-h-screen">
-        <div className="bg-obsidian py-24 section-px text-center">
-          <div className="label-gold text-champagne-400 mb-4">Help Centre</div>
-          <h1 className="font-display text-display-lg text-ivory font-light">Frequently Asked Questions</h1>
-          <div className="w-12 h-px bg-champagne-500 mx-auto mt-8" />
-        </div>
-        <div className="bg-ivory-50">
-          <div className="container-luxury py-20 max-w-3xl mx-auto">
-            <div className="space-y-2">
-              {FAQS.map((faq, i) => (
-                <div key={i} className="bg-white border border-sand-200">
-                  <button
-                    onClick={() => setOpen(open === i ? null : i)}
-                    className="w-full flex items-center justify-between p-6 text-left"
-                  >
-                    <span className="font-body font-medium text-obsidian">{faq.q}</span>
-                    <ChevronDown size={18} className={cn('text-champagne-500 flex-shrink-0 transition-transform duration-200 ml-4', open === i && 'rotate-180')} />
-                  </button>
-                  {open === i && (
-                    <div className="px-6 pb-6">
-                      <div className="h-px bg-sand-200 mb-4" />
-                      <p className="font-body text-obsidian/70 leading-relaxed">{faq.a}</p>
-                    </div>
+      <main className="pt-[var(--nav-height)]">
+        <section style={{ background:'#0a0a0a' }} className="py-20 sm:py-28 text-center section-px">
+          <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.8 }}>
+            <p className="label-gold mb-4" style={{ color:'#c9a96e' }}>Support</p>
+            <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2.5rem,6vw,4.5rem)',lineHeight:1.1 }}>Frequently Asked Questions</h1>
+            <div style={{ width:48,height:1,background:'#c9a96e',margin:'28px auto 0' }} />
+          </motion.div>
+        </section>
+        <section style={{ background:'#faf7f2' }} className="section-py section-px">
+          <div className="max-w-2xl mx-auto space-y-3">
+            {FAQS.map((faq,i) => (
+              <div key={i} style={{ background:'#fff',border:'1px solid #e8dfd0' }}>
+                <button className="w-full flex items-center justify-between p-5 text-left gap-4" onClick={() => setOpen(open===i?null:i)}>
+                  <span style={{ fontFamily:'var(--font-jost)',fontSize:15,fontWeight:500,color:'#0a0a0a' }}>{faq.q}</span>
+                  <ChevronDown size={16} style={{ color:'#c9a96e',flexShrink:0,transform:open===i?'rotate(180deg)':'none',transition:'transform 0.2s' }} />
+                </button>
+                <AnimatePresence>
+                  {open===i && (
+                    <motion.div initial={{ height:0,opacity:0 }} animate={{ height:'auto',opacity:1 }} exit={{ height:0,opacity:0 }} style={{ overflow:'hidden' }}>
+                      <p style={{ fontFamily:'var(--font-jost)',fontSize:14,color:'rgba(10,10,10,0.65)',lineHeight:1.8,padding:'0 20px 20px' }}>{faq.a}</p>
+                    </motion.div>
                   )}
-                </div>
-              ))}
-            </div>
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       </main>
       <Footer />
     </>

@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { authApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -11,56 +14,51 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/forgot-password', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      setSent(true);
-    } catch {}
-    setLoading(false);
+    try { await authApi.forgotPassword(email); setSent(true); }
+    catch { toast.error('Something went wrong. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   return (
     <>
       <Navbar />
-      <main className="pt-[var(--nav-height)] min-h-screen bg-obsidian flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <Link href="/" className="block text-center mb-12">
-            <span className="font-display text-2xl text-ivory tracking-[0.35em] font-light">LUXORA</span>
-          </Link>
-          {sent ? (
-            <div className="text-center">
-              <div className="font-display text-5xl text-champagne-400 mb-4">✉</div>
-              <h2 className="font-display text-2xl text-ivory font-light mb-3">Check Your Email</h2>
-              <p className="font-body text-ivory/50 text-sm mb-8">If an account exists, a reset link has been sent.</p>
-              <Link href="/login" className="label-gold text-champagne-400 hover:text-champagne-300 transition-colors">Back to Sign In</Link>
+      <main className="pt-[var(--nav-height)]" style={{ background:'#0a0a0a',minHeight:'100vh' }}>
+        <div className="flex items-center justify-center min-h-[calc(100vh-var(--nav-height))] section-px py-16">
+          <div style={{ width:'100%',maxWidth:400 }}>
+            <div className="text-center mb-10">
+              <p className="label-gold mb-4" style={{ color:'#c9a96e' }}>Account Recovery</p>
+              <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2rem,5vw,3rem)',lineHeight:1.1 }}>
+                {sent ? 'Check Your Inbox' : 'Reset Password'}
+              </h1>
+              <div style={{ width:48,height:1,background:'#c9a96e',margin:'20px auto 0' }} />
             </div>
-          ) : (
-            <>
-              <h1 className="font-display text-3xl text-ivory font-light mb-2">Reset Password</h1>
-              <p className="font-body text-ivory/50 text-sm mb-10">Enter your email and we will send a reset link.</p>
+            {sent ? (
+              <div className="text-center">
+                <p style={{ fontFamily:'var(--font-jost)',color:'rgba(245,240,232,0.6)',fontSize:14,lineHeight:1.8,marginBottom:28 }}>
+                  If an account exists for that email, we have sent a password reset link. Please check your inbox and spam folder.
+                </p>
+                <Link href="/login" style={{ fontFamily:'var(--font-jost)',color:'#c9a96e',fontSize:13,letterSpacing:'0.1em' }}>Back to Sign In</Link>
+              </div>
+            ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="label-gold text-ivory/40 block mb-3">Email Address</label>
-                  <input
-                    type="email" required value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-transparent border-0 border-b border-ivory/20 pb-3 text-ivory font-body text-sm focus:outline-none focus:border-champagne-500 transition-colors"
-                    placeholder="hello@example.com"
-                  />
+                  <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:10 }}>Email Address</label>
+                  <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="your@email.com"
+                    style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.2)',padding:'12px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
                 </div>
-                <button type="submit" disabled={loading} className="btn-ghost w-full justify-center">
+                <button type="submit" disabled={loading} className="btn-primary w-full justify-center" style={{ background:'#c9a96e',color:'#0a0a0a',padding:'16px',opacity:loading?0.6:1 }}>
                   {loading ? 'Sending...' : 'Send Reset Link'}
                 </button>
-                <div className="text-center">
-                  <Link href="/login" className="font-body text-ivory/40 text-sm hover:text-ivory/70 transition-colors">Back to Sign In</Link>
-                </div>
+                <p className="text-center" style={{ fontFamily:'var(--font-jost)',fontSize:13,color:'rgba(245,240,232,0.4)' }}>
+                  Remember your password?{' '}
+                  <Link href="/login" style={{ color:'#c9a96e' }}>Sign In</Link>
+                </p>
               </form>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

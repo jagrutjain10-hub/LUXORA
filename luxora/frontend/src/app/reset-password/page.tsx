@@ -1,86 +1,76 @@
 'use client';
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { Eye, EyeOff } from 'lucide-react';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
 
-function ResetPasswordForm() {
+export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get('token') ?? '';
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) { setError('Passwords do not match'); return; }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (password !== confirm) { toast.error('Passwords do not match'); return; }
+    if (password.length < 8) { toast.error('Password must be at least 8 characters'); return; }
     setLoading(true);
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/reset-password/' + token, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      });
-      const data = await res.json();
-      if (data.success) { setDone(true); setTimeout(() => router.push('/login'), 2000); }
-      else setError(data.message || 'Failed to reset password');
-    } catch { setError('Something went wrong. Please try again.'); }
-    setLoading(false);
+      await api.post(`/auth/reset-password/${token}`, { password });
+      toast.success('Password reset successfully!');
+      router.push('/login');
+    } catch (err:any) {
+      toast.error(err.response?.data?.message ?? 'Reset link may have expired.');
+    } finally { setLoading(false); }
   };
 
   return (
     <>
       <Navbar />
-      <main className="pt-[var(--nav-height)] min-h-screen bg-obsidian flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <Link href="/" className="block text-center mb-12">
-            <span className="font-display text-2xl text-ivory tracking-[0.35em] font-light">LUXORA</span>
-          </Link>
-          {done ? (
-            <div className="text-center">
-              <div className="font-display text-5xl text-champagne-400 mb-4">✓</div>
-              <h2 className="font-display text-2xl text-ivory font-light mb-2">Password Reset!</h2>
-              <p className="font-body text-ivory/50 text-sm">Redirecting to sign in...</p>
+      <main className="pt-[var(--nav-height)]" style={{ background:'#0a0a0a',minHeight:'100vh' }}>
+        <div className="flex items-center justify-center min-h-[calc(100vh-var(--nav-height))] section-px py-16">
+          <div style={{ width:'100%',maxWidth:400 }}>
+            <div className="text-center mb-10">
+              <p className="label-gold mb-4" style={{ color:'#c9a96e' }}>Account Recovery</p>
+              <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2rem,5vw,3rem)',lineHeight:1.1 }}>Set New Password</h1>
+              <div style={{ width:48,height:1,background:'#c9a96e',margin:'20px auto 0' }} />
             </div>
-          ) : (
-            <>
-              <h1 className="font-display text-3xl text-ivory font-light mb-2">New Password</h1>
-              <p className="font-body text-ivory/50 text-sm mb-10">Enter your new password below.</p>
-              {error && <div className="bg-red-900/20 border border-red-800/30 text-red-400 p-4 mb-6 font-body text-sm">{error}</div>}
+            {!token ? (
+              <p className="text-center" style={{ fontFamily:'var(--font-jost)',color:'rgba(245,240,232,0.5)',fontSize:14 }}>
+                Invalid reset link. <Link href="/forgot-password" style={{ color:'#c9a96e' }}>Request a new one.</Link>
+              </p>
+            ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                {[['New Password', password, setPassword], ['Confirm Password', confirm, setConfirm]].map(([label, val, setter]: any) => (
-                  <div key={label as string}>
-                    <label className="label-gold text-ivory/40 block mb-3">{label}</label>
-                    <input
-                      type="password" required value={val}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value)}
-                      className="w-full bg-transparent border-0 border-b border-ivory/20 pb-3 text-ivory font-body text-sm focus:outline-none focus:border-champagne-500 transition-colors"
-                      placeholder="••••••••"
-                    />
+                {[['New Password',password,setPassword,'password'],['Confirm Password',confirm,setConfirm,'confirm']].map(([label,val,setter,id]:any) => (
+                  <div key={id}>
+                    <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:10 }}>{label}</label>
+                    <div style={{ position:'relative' }}>
+                      <input type={showPw?'text':'password'} value={val} onChange={e=>setter(e.target.value)} required
+                        style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.2)',padding:'12px 40px 12px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
+                      {id==='password' && (
+                        <button type="button" onClick={()=>setShowPw(!showPw)} style={{ position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',color:'rgba(245,240,232,0.4)',background:'none',border:'none',cursor:'pointer' }}>
+                          {showPw?<EyeOff size={16}/>:<Eye size={16}/>}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
-                <button type="submit" disabled={loading} className="btn-ghost w-full justify-center">
-                  {loading ? 'Resetting...' : 'Reset Password'}
+                <button type="submit" disabled={loading} className="btn-primary w-full justify-center" style={{ background:'#c9a96e',color:'#0a0a0a',padding:'16px',opacity:loading?0.6:1 }}>
+                  {loading?'Resetting...':'Reset Password'}
                 </button>
-                <div className="text-center">
-                  <Link href="/login" className="font-body text-ivory/40 text-sm hover:text-ivory/70 transition-colors">Back to Sign In</Link>
-                </div>
               </form>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </main>
+      <Footer />
     </>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-obsidian" />}>
-      <ResetPasswordForm />
-    </Suspense>
   );
 }

@@ -1,252 +1,114 @@
 'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Eye, EyeOff, ArrowRight, Loader, Check } from 'lucide-react';
-import { useRegister } from '@/hooks/useProducts';
-import { cn } from '@/lib/utils';
-
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name required'),
-  lastName: z.string().min(2, 'Last name required'),
-  email: z.string().email('Valid email required'),
-  phone: z.string().optional(),
-  password: z.string()
-    .min(8, 'At least 8 characters')
-    .regex(/[A-Z]/, 'Include at least one uppercase letter')
-    .regex(/[0-9]/, 'Include at least one number'),
-  confirmPassword: z.string(),
-  agreeToTerms: z.boolean().refine(v => v === true, 'You must agree to the terms'),
-}).refine(d => d.password === d.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { Eye, EyeOff, Check, ArrowRight } from 'lucide-react';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { authApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
-  const [showPass, setShowPass] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ firstName:'',lastName:'',email:'',password:'',confirmPassword:'',phone:'' });
+  const [showPw, setShowPw] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { mutate: register, isPending } = useRegister();
+  const pw = form.password;
+  const checks = [pw.length>=8, /[A-Z]/.test(pw), /[0-9]/.test(pw)];
 
-  const { register: rf, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const password = watch('password', '');
-  const passwordChecks = [
-    { label: '8+ characters', pass: password.length >= 8 },
-    { label: 'Uppercase letter', pass: /[A-Z]/.test(password) },
-    { label: 'Number', pass: /[0-9]/.test(password) },
-  ];
-
-  const onSubmit = (data: RegisterFormData) => {
-    register(data, {
-      onSuccess: () => setSubmitted(true),
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreed) { toast.error('Please agree to the Terms of Service'); return; }
+    if (form.password !== form.confirmPassword) { toast.error('Passwords do not match'); return; }
+    setLoading(true);
+    try {
+      await authApi.register(form);
+      toast.success('Account created! You can now sign in.');
+      router.push('/login');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Registration failed.');
+    } finally { setLoading(false); }
   };
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-obsidian flex items-center justify-center p-8">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md"
-        >
-          <div className="w-16 h-16 bg-champagne-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check size={28} className="text-champagne-400" />
-          </div>
-          <div className="label-gold text-champagne-400 mb-3">Account Created</div>
-          <h2 className="font-display text-3xl text-ivory font-light mb-4">Verify Your Email</h2>
-          <p className="text-ivory/50 font-body mb-8 leading-relaxed">
-            We've sent a verification link to your email address. Please check your inbox and click the link to activate your account.
-          </p>
-          <Link href="/login" className="btn-ghost">
-            Return to Sign In
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-obsidian flex">
-      {/* Decorative Panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden"
-        style={{ background: 'radial-gradient(ellipse at 60% 40%, #0e1a2e 0%, #0a0a0a 70%)' }}
-      >
-        <div className="absolute inset-0 bg-noise opacity-40" />
-        <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full border border-champagne-900/20" />
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 rounded-full border border-champagne-900/10" />
+    <>
+      <Navbar />
+      <main className="pt-[var(--nav-height)]" style={{ minHeight:'100vh',background:'#0a0a0a' }}>
+        <div style={{ display:'flex',alignItems:'center',justifyContent:'center',minHeight:'calc(100vh - var(--nav-height))',padding:'48px 24px' }}>
+          <div style={{ width:'100%',maxWidth:440 }}>
+            <Link href="/" className="block text-center mb-8">
+              <span style={{ fontFamily:'var(--font-cormorant)',fontSize:32,color:'#f5f0e8',fontWeight:300,letterSpacing:'0.4em' }}>LUXORA</span>
+            </Link>
+            <div className="mb-8 text-center">
+              <p className="label-gold mb-3" style={{ color:'#c9a96e' }}>New Member</p>
+              <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2rem,4vw,3rem)',lineHeight:1.1 }}>Create Account</h1>
+              <div style={{ width:48,height:1,background:'#c9a96e',margin:'16px auto 0' }} />
+            </div>
 
-        <div className="relative z-10 text-center px-16">
-          <Link href="/">
-            <div className="font-display text-4xl text-ivory tracking-[0.4em] font-light mb-4">LUXORA</div>
-          </Link>
-          <div className="w-12 h-px bg-champagne-600 mx-auto mb-8" />
-          <p className="text-ivory/50 font-body leading-relaxed italic">
-            Join thousands who've transformed their spaces with LUXORA's curated luxury collection.
-          </p>
-          <div className="mt-12 space-y-4">
-            {[
-              'Exclusive member-only previews',
-              'Early access to new arrivals',
-              'Order tracking & history',
-              'Curated recommendations',
-            ].map(benefit => (
-              <div key={benefit} className="flex items-center gap-3 text-ivory/50 text-sm font-body">
-                <Check size={14} className="text-champagne-600 flex-shrink-0" />
-                {benefit}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16 }}>
+                {[['firstName','First Name'],['lastName','Last Name']].map(([f,l]) => (
+                  <div key={f}>
+                    <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:8 }}>{l}</label>
+                    <input type="text" value={(form as any)[f]} onChange={e=>setForm(p=>({...p,[f]:e.target.value}))} required placeholder={l}
+                      style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'10px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
+                  </div>
+                ))}
               </div>
-            ))}
+              {[['email','Email Address','email'],['phone','Phone (Optional)','tel']].map(([f,l,t]) => (
+                <div key={f}>
+                  <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:8 }}>{l}</label>
+                  <input type={t} value={(form as any)[f]} onChange={e=>setForm(p=>({...p,[f]:e.target.value}))} required={f==='email'} placeholder={l}
+                    style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'10px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
+                </div>
+              ))}
+              <div>
+                <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:8 }}>Password</label>
+                <div style={{ position:'relative' }}>
+                  <input type={showPw?'text':'password'} value={form.password} onChange={e=>setForm(p=>({...p,password:e.target.value}))} required placeholder="Min 8 characters"
+                    style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'10px 36px 10px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
+                  <button type="button" onClick={()=>setShowPw(!showPw)} style={{ position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:'rgba(245,240,232,0.3)',cursor:'pointer' }}>
+                    {showPw?<EyeOff size={16}/>:<Eye size={16}/>}
+                  </button>
+                </div>
+                {pw && (
+                  <div style={{ display:'flex',gap:16,marginTop:8 }}>
+                    {[['8+ chars',checks[0]],['Uppercase',checks[1]],['Number',checks[2]]].map(([l,ok]:any) => (
+                      <span key={l} style={{ fontFamily:'var(--font-jost)',fontSize:11,color:ok?'#c9a96e':'rgba(245,240,232,0.3)',display:'flex',alignItems:'center',gap:4 }}>
+                        {ok && <Check size={10}/>}{l}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:8 }}>Confirm Password</label>
+                <input type="password" value={form.confirmPassword} onChange={e=>setForm(p=>({...p,confirmPassword:e.target.value}))} required placeholder="Repeat password"
+                  style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'10px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
+              </div>
+              <label style={{ display:'flex',alignItems:'flex-start',gap:12,cursor:'pointer' }}>
+                <input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} style={{ marginTop:2,accentColor:'#c9a96e',flexShrink:0 }} />
+                <span style={{ fontFamily:'var(--font-jost)',fontSize:13,color:'rgba(245,240,232,0.5)',lineHeight:1.6 }}>
+                  I agree to LUXORA&apos;s{' '}
+                  <Link href="/terms" style={{ color:'#c9a96e' }}>Terms of Service</Link>{' '}and{' '}
+                  <Link href="/privacy" style={{ color:'#c9a96e' }}>Privacy Policy</Link>
+                </span>
+              </label>
+              <button type="submit" disabled={loading||!agreed}
+                style={{ width:'100%',background:'#c9a96e',color:'#0a0a0a',padding:'16px',fontFamily:'var(--font-jost)',fontSize:12,letterSpacing:'0.15em',textTransform:'uppercase',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,opacity:(loading||!agreed)?0.5:1,minHeight:52 }}>
+                {loading?'Creating Account...':<><span>Create Account</span><ArrowRight size={14}/></>}
+              </button>
+            </form>
+            <p className="text-center mt-6" style={{ fontFamily:'var(--font-jost)',fontSize:13,color:'rgba(245,240,232,0.35)' }}>
+              Already have an account?{' '}
+              <Link href="/login" style={{ color:'#c9a96e' }}>Sign In</Link>
+            </p>
           </div>
         </div>
-      </div>
-
-      {/* Form */}
-      <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md py-8"
-        >
-          <Link href="/" className="lg:hidden block text-center mb-10">
-            <span className="font-display text-3xl text-ivory tracking-[0.4em]">LUXORA</span>
-          </Link>
-
-          <div className="mb-10">
-            <div className="label-gold text-champagne-400 mb-3">New Member</div>
-            <h1 className="font-display text-display-sm text-ivory font-light">Create Account</h1>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-2">First Name *</label>
-                <input
-                  {...rf('firstName')}
-                  placeholder="Priya"
-                  className={cn(
-                    'w-full bg-transparent border-b py-3 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                    errors.firstName ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                  )}
-                />
-                {errors.firstName && <p className="text-red-400 text-xs mt-1">{errors.firstName.message}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-2">Last Name *</label>
-                <input
-                  {...rf('lastName')}
-                  placeholder="Mehta"
-                  className={cn(
-                    'w-full bg-transparent border-b py-3 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                    errors.lastName ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                  )}
-                />
-                {errors.lastName && <p className="text-red-400 text-xs mt-1">{errors.lastName.message}</p>}
-              </div>
-            </div>
-
-            {[
-              { name: 'email' as const, label: 'Email Address *', type: 'email', placeholder: 'hello@example.com' },
-              { name: 'phone' as const, label: 'Phone (Optional)', type: 'tel', placeholder: '+91 98765 43210' },
-            ].map(({ name, label, type, placeholder }) => (
-              <div key={name}>
-                <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-2">{label}</label>
-                <input
-                  {...rf(name)}
-                  type={type}
-                  placeholder={placeholder}
-                  className={cn(
-                    'w-full bg-transparent border-b py-3 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                    errors[name] ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                  )}
-                />
-                {errors[name] && <p className="text-red-400 text-xs mt-1">{(errors[name] as any)?.message}</p>}
-              </div>
-            ))}
-
-            <div>
-              <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-2">Password *</label>
-              <div className="relative">
-                <input
-                  {...rf('password')}
-                  type={showPass ? 'text' : 'password'}
-                  placeholder="Create a strong password"
-                  className={cn(
-                    'w-full bg-transparent border-b py-3 pr-10 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                    errors.password ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                  )}
-                />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-0 top-1/2 -translate-y-1/2 text-ivory/30 hover:text-ivory/60 transition-colors">
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-
-              {/* Password strength */}
-              {password && (
-                <div className="flex gap-3 mt-3">
-                  {passwordChecks.map(({ label, pass }) => (
-                    <div key={label} className={cn('flex items-center gap-1.5 text-xs font-body', pass ? 'text-green-400' : 'text-ivory/30')}>
-                      <Check size={10} className={cn(pass && 'text-green-400')} />
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-body text-ivory/50 uppercase tracking-widest mb-2">Confirm Password *</label>
-              <input
-                {...rf('confirmPassword')}
-                type="password"
-                placeholder="Repeat password"
-                className={cn(
-                  'w-full bg-transparent border-b py-3 text-ivory placeholder:text-ivory/25 font-body text-sm focus:outline-none transition-colors',
-                  errors.confirmPassword ? 'border-red-500' : 'border-ivory/15 focus:border-champagne-500'
-                )}
-              />
-              {errors.confirmPassword && <p className="text-red-400 text-xs mt-1">{errors.confirmPassword.message}</p>}
-            </div>
-
-            <label className="flex items-start gap-3 cursor-pointer pt-2">
-              <input {...rf('agreeToTerms')} type="checkbox" className="accent-champagne-500 w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm font-body text-ivory/50 leading-relaxed">
-                I agree to LUXORA's{' '}
-                <Link href="/terms" className="text-champagne-500 hover:text-champagne-400">Terms of Service</Link>
-                {' '}and{' '}
-                <Link href="/privacy" className="text-champagne-500 hover:text-champagne-400">Privacy Policy</Link>
-              </span>
-            </label>
-            {errors.agreeToTerms && <p className="text-red-400 text-xs">{errors.agreeToTerms.message}</p>}
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full py-4 bg-champagne-500 text-obsidian font-body text-sm uppercase tracking-widest
-                         hover:bg-champagne-400 disabled:opacity-60 transition-all duration-200 flex items-center justify-center gap-2 mt-4"
-            >
-              {isPending ? <Loader size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-              {isPending ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-sm font-body text-ivory/40">
-            Already a member?{' '}
-            <Link href="/login" className="text-champagne-500 hover:text-champagne-400 transition-colors">Sign In</Link>
-          </p>
-        </motion.div>
-      </div>
-    </div>
+      </main>
+      <Footer />
+    </>
   );
 }

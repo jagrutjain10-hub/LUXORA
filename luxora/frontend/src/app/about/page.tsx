@@ -1,40 +1,50 @@
 'use client';
+import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { motion } from 'framer-motion';
 
 export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-[var(--nav-height)] min-h-screen">
-        <div className="bg-obsidian py-24 section-px text-center">
-          <div className="label-gold text-champagne-400 mb-4">Our Story</div>
-          <h1 className="font-display text-display-lg text-ivory font-light">About LUXORA</h1>
-          <div className="w-12 h-px bg-champagne-500 mx-auto mt-8" />
-        </div>
-        <div className="bg-ivory-50">
-          <div className="container-luxury py-20">
-            <div className="max-w-3xl mx-auto">
-              <div className="label-gold mb-4">Where Luxury Meets Home</div>
-              <h2 className="font-display text-display-sm text-obsidian font-light mb-8">
-                Redefining the Art of Living
-              </h2>
-              <div className="space-y-6 font-body text-obsidian/70 leading-relaxed">
-                <p>LUXORA was founded with a singular vision — to bring the world&apos;s most exceptional decorative pieces into homes across India. We believe that the spaces we inhabit shape who we are, and that every home deserves to be filled with beauty, craftsmanship, and meaning.</p>
-                <p>Each piece in our collection is hand-selected by our team of luxury interior experts. We work directly with master artisans, heritage workshops, and contemporary designers to bring you objects that are not merely decorative — they are heirlooms in the making.</p>
-                <p>From sculptural vases that command attention to subtle table accents that complete a room, every LUXORA piece tells a story of exceptional craft and timeless elegance.</p>
-              </div>
-              <div className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-sand-200 text-center">
-                {[['2,400+', 'Products'], ['48K+', 'Happy Clients'], ['100%', 'Authentic']].map(([val, label]) => (
-                  <div key={label}>
-                    <div className="font-display text-3xl text-champagne-500 font-light mb-2">{val}</div>
-                    <div className="label-gold text-obsidian/40">{label}</div>
-                  </div>
-                ))}
-              </div>
+      <main className="pt-[var(--nav-height)]">
+        <section style={{ background:'#0a0a0a' }} className="py-20 sm:py-28 text-center section-px">
+          <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.8 }}>
+            <p className="label-gold mb-4" style={{ color:'#c9a96e' }}>Our Story</p>
+            <h1 style={{ fontFamily:'var(--font-cormorant)',fontWeight:300,color:'#f5f0e8',fontSize:'clamp(2.5rem,6vw,4.5rem)',lineHeight:1.1 }}>About LUXORA</h1>
+            <div style={{ width:48,height:1,background:'#c9a96e',margin:'28px auto 0' }} />
+          </motion.div>
+        </section>
+        <section style={{ background:'#faf7f2' }} className="section-py section-px">
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-6" style={{ fontFamily:'var(--font-jost)',color:'rgba(10,10,10,0.75)',lineHeight:1.9,fontSize:16 }}>
+              <p>LUXORA was founded with a singular vision: to bring museum-quality decorative art into the homes of those who appreciate beauty, craftsmanship, and the subtle power of a well-curated space.</p>
+              <p>Every piece in our collection is sourced directly from artisans and ateliers across India and beyond — chosen not just for aesthetic appeal, but for the story it carries and the emotion it evokes.</p>
+              <p>We believe that a home is more than architecture. It is a reflection of the people who inhabit it. Our mission is to give you the pieces that make your space unmistakably, irreplaceably yours.</p>
+            </div>
+            <div className="grid grid-cols-3 gap-6 mt-16 pt-12" style={{ borderTop:'1px solid #e8dfd0' }}>
+              {[['2,400+','Curated Products'],['48K+','Happy Clients'],['100%','Authentic']].map(([v,l]) => (
+                <div key={l} className="text-center">
+                  <div style={{ fontFamily:'var(--font-cormorant)',fontSize:'clamp(1.8rem,4vw,2.5rem)',fontWeight:300,color:'#c9a96e' }}>{v}</div>
+                  <div className="label-gold mt-2" style={{ color:'rgba(10,10,10,0.4)' }}>{l}</div>
+                </div>
+              ))}
+            </div>
+            <div className="grid sm:grid-cols-2 gap-5 mt-14">
+              {[['Artisan Crafted','Every piece is handcrafted by skilled artisans using premium materials sourced globally.'],['Curated Excellence','Our team carefully selects each product to meet our exacting standards.'],['Premium Delivery','White-glove packaging ensures your pieces arrive in pristine condition.'],['Lifetime Authenticity','Each piece comes with our commitment to genuine luxury craftsmanship.']].map(([t,d]) => (
+                <div key={t} style={{ background:'#fff',border:'1px solid #e8dfd0',padding:'28px 24px' }}>
+                  <div style={{ width:24,height:1,background:'#c9a96e',marginBottom:16 }} />
+                  <h3 style={{ fontFamily:'var(--font-cormorant)',fontWeight:400,fontSize:20,color:'#0a0a0a',marginBottom:10 }}>{t}</h3>
+                  <p style={{ fontFamily:'var(--font-jost)',fontSize:14,color:'rgba(10,10,10,0.6)',lineHeight:1.7 }}>{d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-12 text-center">
+              <Link href="/products" className="btn-primary">Explore the Collection</Link>
             </div>
           </div>
-        </div>
+        </section>
       </main>
       <Footer />
     </>
