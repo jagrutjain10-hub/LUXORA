@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
         <section style={{ background:'#faf7f2' }} className="section-py section-px">
           <div className="container-luxury">
-            <div style={{ display:'grid',lg:'grid-cols-3',gap:24 }} className="grid lg:grid-cols-4">
+            <div className="grid lg:grid-cols-4 gap-6">
               {/* Sidebar */}
               <div style={{ background:'#fff',border:'1px solid #e8dfd0',padding:'8px 0',height:'fit-content' }}>
                 {[['My Profile','/dashboard/profile',User],['My Orders','/dashboard/orders',ShoppingBag],['Wishlist','/wishlist',Heart],['Addresses','/dashboard/addresses',MapPin]].map(([l,h,Icon]:any) => (
@@ -93,7 +93,7 @@ export default function DashboardPage() {
                     <Link href="/dashboard/profile" style={{ fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',color:'#c9a96e',textDecoration:'none' }}>Edit</Link>
                   </div>
                   <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16 }}>
-                    {[['First Name',user.firstName],['Last Name',user.lastName],['Email',user.email],['Phone',user.phone||'—']].map(([l,v]:any) => (
+                    {[['First Name',user.firstName],['Last Name',user.lastName],['Email',user.email],['Phone',(user as any).phone||'—']].map(([l,v]) => (
                       <div key={l}>
                         <p style={{ fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(10,10,10,0.4)',marginBottom:4 }}>{l}</p>
                         <p style={{ fontFamily:'var(--font-jost)',fontSize:14,color:'#0a0a0a' }}>{v}</p>
@@ -141,3 +141,4 @@ export default function DashboardPage() {
     </>
   );
 }
+

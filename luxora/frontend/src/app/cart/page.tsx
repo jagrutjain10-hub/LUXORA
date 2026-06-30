@@ -8,7 +8,7 @@ import { useCartStore } from '@/store/cart.store';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CartPage() {
-  const { items, updateQty, removeItem, subtotal } = useCartStore();
+  const { items, updateQuantity, removeItem, subtotal } = useCartStore();
   const sub = subtotal();
   const shipping = sub >= 2999 ? 0 : 199;
   const total = sub + shipping;
@@ -46,9 +46,9 @@ export default function CartPage() {
                           <p style={{ fontFamily:'var(--font-cormorant)',fontSize:20,color:'#0a0a0a',marginBottom:12 }}>₹{item.price.toLocaleString('en-IN')}</p>
                           <div className="flex items-center justify-between">
                             <div style={{ display:'flex',alignItems:'center',border:'1px solid #e8dfd0' }}>
-                              <button onClick={()=>updateQty(item.productId,item.quantity-1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Minus size={12}/></button>
+                              <button onClick={()=>updateQuantity(item.productId,item.quantity-1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Minus size={12}/></button>
                               <span style={{ width:36,textAlign:'center',fontFamily:'var(--font-jost)',fontSize:14,color:'#0a0a0a' }}>{item.quantity}</span>
-                              <button onClick={()=>updateQty(item.productId,item.quantity+1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Plus size={12}/></button>
+                              <button onClick={()=>updateQuantity(item.productId,item.quantity+1)} style={{ width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(10,10,10,0.5)' }}><Plus size={12}/></button>
                             </div>
                             <button onClick={()=>removeItem(item.productId)} style={{ color:'rgba(10,10,10,0.3)',background:'none',border:'none',cursor:'pointer',padding:4 }} className="hover:text-red-500 transition-colors"><Trash2 size={15}/></button>
                           </div>
