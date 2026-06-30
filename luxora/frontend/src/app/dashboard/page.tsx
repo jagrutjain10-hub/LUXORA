@@ -92,7 +92,7 @@ export default function DashboardPage() {
                     <h2 style={{ fontFamily:'var(--font-cormorant)',fontWeight:400,fontSize:22,color:'#0a0a0a' }}>Profile</h2>
                     <Link href="/dashboard/profile" style={{ fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',color:'#c9a96e',textDecoration:'none' }}>Edit</Link>
                   </div>
-                  <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16' }}>
+                  <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16 }}>
                     {[['First Name',user.firstName],['Last Name',user.lastName],['Email',user.email],['Phone',user.phone||'—']].map(([l,v]:any) => (
                       <div key={l}>
                         <p style={{ fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(10,10,10,0.4)',marginBottom:4 }}>{l}</p>
