@@ -46,8 +46,8 @@ export function Footer() {
             {/* Contact */}
             <div className="mt-6 space-y-2.5">
               {[
-                { icon: Mail, text: 'hello@luxora.in', href: 'mailto:hello@luxora.in' },
-                { icon: Phone, text: '+91 98765 43210', href: 'tel:+919876543210' },
+                { icon: Mail, text: 'luxora2010@gmail.com', href: 'mailto:luxora2010@gmail.com' },
+                { icon: Phone, text: '+91 79729 90686', href: 'tel:+917972990686' },
                 { icon: MapPin, text: 'Mumbai, India', href: null },
               ].map(({ icon: Icon, text, href }) => (
                 <div key={text} className="flex items-center gap-2.5 text-ivory/40 text-sm font-body">
