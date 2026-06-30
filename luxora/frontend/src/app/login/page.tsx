@@ -62,7 +62,7 @@ export default function LoginPage() {
                 <div>
                   <label style={{ display:'block',fontFamily:'var(--font-jost)',fontSize:11,letterSpacing:'0.15em',textTransform:'uppercase',color:'rgba(245,240,232,0.4)',marginBottom:10 }}>Email Address</label>
                   <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="your@email.com"
-                    style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'12px 0',fontFamily:'var(--font-jost)',fontSize:16,color:'#f5f0e8',outline:'none',fontSize:16 }} />
+                    style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'12px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
                 </div>
                 <div>
                   <div style={{ display:'flex',justifyContent:'space-between',marginBottom:10 }}>
@@ -71,7 +71,7 @@ export default function LoginPage() {
                   </div>
                   <div style={{ position:'relative' }}>
                     <input type={showPw?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required placeholder="••••••••"
-                      style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'12px 36px 12px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none',fontSize:16 }} />
+                      style={{ width:'100%',background:'rgba(255,255,255,0.04)',border:'none',borderBottom:'1px solid rgba(245,240,232,0.15)',padding:'12px 36px 12px 0',fontFamily:'var(--font-jost)',fontSize:15,color:'#f5f0e8',outline:'none' }} />
                     <button type="button" onClick={()=>setShowPw(!showPw)} style={{ position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:'rgba(245,240,232,0.3)',cursor:'pointer' }}>
                       {showPw?<EyeOff size={16}/>:<Eye size={16}/>}
                     </button>
